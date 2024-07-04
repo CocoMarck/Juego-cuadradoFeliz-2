@@ -91,6 +91,11 @@ while loop_game:
     scroll_float[1] += (player.rect.y -scroll_float[1] -disp_height/2)/4
     scroll_int = [int(scroll_float[0]), int(scroll_float[1])]
     
+    # Función | Para establecer transparensia a los objetos
+    for sprite in transparency_all_sprites:
+        sprite.transparency_collide = 0
+        sprite.transparency_sprite = 255
+    
     # Mostrar sprites
     for sprite in layer_all_sprites.sprites():
         display_scale.blit(
