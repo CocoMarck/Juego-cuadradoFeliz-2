@@ -8,41 +8,159 @@ from pygame.locals import *
 
 
 # Sonidos
-all_sounds = []
+all_sounds = {
+    'steps':
+    [
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/steps/step-1.ogg') ),
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/steps/step-2.ogg') ),
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/steps/step-3.ogg') )
+    ],
 
-sounds_step = [
-    pygame.mixer.Sound( os.path.join(dir_audio, 'effects/steps/step-1.ogg') ),
-    pygame.mixer.Sound( os.path.join(dir_audio, 'effects/steps/step-2.ogg') ),
-    pygame.mixer.Sound( os.path.join(dir_audio, 'effects/steps/step-3.ogg') )
-]
-for sound in sounds_step:
-    all_sounds.append(sound)
+    'jump':
+    pygame.mixer.Sound( os.path.join(dir_audio, 'effects/jump.ogg') ),
     
-for sound in all_sounds:
-    sound.set_volume(volume)
+    'hits':
+    [
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/hits/hit-1.ogg') ),
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/hits/hit-2.ogg') ),
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/hits/hit-3.ogg') )
+    ],
+    
+    'dead':
+    [
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/dead/dead-1.ogg') ),
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/dead/dead-2.ogg') ),
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/dead/dead-3.ogg') )
+    ],
+}
+for key in all_sounds.keys():
+    sound_or_sounds = all_sounds[key]
+    if type( sound_or_sounds ) == list:
+        for sound in sound_or_sounds:
+            sound.set_volume( volume )
+    else:
+        sound_or_sounds.set_volume( volume )
+
+
+# Sonido | Función para devolver un sonido
+def get_sound( sound=None, number=None ):
+    # Detectar que los parametros esten correctos
+    error = False
+    if sound == None:
+        error = True
+    else:
+        sound_good = False
+        for key in all_sounds.keys():
+            if sound == key:
+                if sound_good == False:
+                    sound_good = True
+            
+        if sound_good == False:
+            error = True
+
+    if not number == None:
+        if number < 0:
+            error = True
+    
+    if error == True:
+        sound = 'steps'
+        number = 0
+    
+    # Devolver sonido | Establecer sonido final
+    if type( all_sounds[sound] ) == list:
+        if number == None:
+            sound_final = random.choice( all_sounds[sound] )
+        else:
+            sounds_number = len(all_sounds)-1
+            if number > sounds_number:
+                number = sounds_number
+            sound_final = all_sounds[sound][number]
+    else:
+        sound_final = all_sounds[sound]
+    
+    return sound_final
 
 
 
 
 # Sprites
-sprite_stone = pygame.transform.scale(
-    pygame.image.load( os.path.join(dir_sprites, 'floor/stone.png') ), 
-    (grid_square, grid_square)
-)
-sprite_list_player_move = Anim_sprite_set(
-    sprite_sheet = pygame.transform.scale(
-        pygame.image.load( os.path.join(dir_sprites, 'player/player_move.png') ),
-        (grid_square*16, grid_square*2)
+all_images = {}
+
+all_images.update( {
+    'stone':
+    pygame.transform.scale(
+        pygame.image.load( os.path.join(dir_sprites, 'floor/stone.png') ), 
+        (grid_square, grid_square)
     ),
-    current_frame=None
-)
-sprite_list_player_not_move = Anim_sprite_set(
-    sprite_sheet = pygame.transform.scale(
-        pygame.image.load( os.path.join(dir_sprites, 'player/player_not-move.png') ),
-        (grid_square*6, grid_square*2)
+
+    'player_move':
+    Anim_sprite_set(
+        sprite_sheet = pygame.transform.scale( 
+            pygame.image.load( os.path.join(dir_sprites, 'player/player_move.png') ),
+            (grid_square*16, grid_square*2)
+        ),
+        current_frame=None
     ),
-    current_frame=None
-)
+
+    'player_not-move':
+    Anim_sprite_set(
+        sprite_sheet = pygame.transform.scale(
+            pygame.image.load( os.path.join(dir_sprites, 'player/player_not-move.png') ),
+            (grid_square*6, grid_square*2)
+        ),
+        current_frame=None
+    ),
+    
+    'player_hit-type':
+    Anim_sprite_set(
+        sprite_sheet = pygame.transform.scale(
+            pygame.image.load( os.path.join(dir_sprites, 'player/player_hit-type.png') ),
+            (grid_square*8, grid_square*2)
+        ),
+        current_frame=None
+    )
+
+} )
+
+def get_image(image=None, number=None):
+    # Detectar si la imagen es buena o no
+    error = False
+    if image == None:
+        error = True
+    else:
+        image_good = False
+        for key in all_images.keys():
+            if key == image:
+                if image_good == False:
+                    image_good = True
+        
+        if image_good == False:
+            error = True
+    
+    if not number == None:
+        if number < 0:
+            error = True
+    
+    if error == True:
+        image = 'player_not-move'
+        number = 0
+    
+    
+    # Devolver imagen | Establecer imagen
+    if type(all_images[image]) == list:
+        image_number = len( all_images[image] ) -1
+        if not number == None:
+            if number > image_number:
+                number = image_number
+            final_image = all_images[image][number]
+        else:
+            final_image = random.choice(
+                all_images[image]
+            )
+    else:    
+        final_image = all_images[image]
+
+    return final_image
 
 
 
@@ -65,6 +183,11 @@ class Player(pygame.sprite.Sprite):
         )
         layer_all_sprites.add(self, layer=1)
         
+        # Variables de transparencia de collider y sprite
+        self.transparency_collide = 255
+        self.transparency_sprite = 255
+        transparency_all_sprites.add(self)
+        
         
         # Movimiento Teclas/Botones
         self.__pressed_left = K_LEFT
@@ -86,6 +209,7 @@ class Player(pygame.sprite.Sprite):
         
         # Movimiento Variables
         self.moving_xy = [0, 0]
+        self.hp = 100
         self.__speed_run = size*0.3125 # Porsentaje 30.25 %
         self.__speed_walk = size*0.1250 # Porsentaje 12.50 %
 
@@ -103,9 +227,14 @@ class Player(pygame.sprite.Sprite):
         
         # Sprite
         self.__sprite = pygame.sprite.Sprite()
-        self.__sprite.surf = sprite_list_player_move[0]#.copy()
+        self.__sprite.surf = get_image('player_move', 0)
         self.__sprite.rect = self.__sprite.surf.get_rect(  )
         self.__sprite_current_frame = 0
+        
+        
+        # Sonido Contador de pasos
+        self.__step_count = 0
+        self.__collide_in_floor = 'wait'
 
     
     def change_speed( self, speed=8, change_walk=False ):
@@ -140,6 +269,8 @@ class Player(pygame.sprite.Sprite):
         self.move_down = False
         self.move_jump = False
         self.__walking = False
+        self.hit_normal = False
+        self.hit_power = False
 
         if pressed_left:
             self.move_left = True
@@ -158,8 +289,6 @@ class Player(pygame.sprite.Sprite):
             self.jump()
         
         # Acciónar Golpes
-        self.hit_normal = False
-        self.hit_power = False
         if pressed_hit_normal:
             self.hit_normal = True
         if pressed_hit_power:
@@ -176,14 +305,48 @@ class Player(pygame.sprite.Sprite):
         '''
         Para que el jugador pueda interactuar
         '''
+        # HP | Si la hp esta en cero:
+        # Dejar de moverse y de verse
+        # Dejar de interactuar con los objetos.
+        if self.hp <= 0:
+            dead = True
+            
+            self.move_left = False
+            self.move_right = False
+            self.move_up = False
+            self.move_down = False
+            self.move_jump = False
+            self.__walking = False
+            self.hit_normal = False
+            self.hit_power = False
+            
+            self.__jump_count = 0
+            self.transparency_sprite = 0
+        else:
+            dead = False
+
+            if self.transparency_sprite != 255:
+                self.transparency_sprite = 255
+        
+        # Variables de daño
+        damage = 0
+        damage_effect = False
+        
+        
         # Detectar si esta en el piso o no. 
         # Esto se determina dependiendo la cantidad de frames en las que el jugador esta en el aire.
         if self.__air_count <= 2: # 5 para que funcione en la resolucion mas baja "128x72"
             # En el piso | Sin gravedad
             fall = False
+            if self.__collide_in_floor == 'wait':
+                self.__collide_in_floor = 'yes'
+            elif self.__collide_in_floor == 'yes':
+                self.__collide_in_floor = 'no'
+                
         else:
             # En caida | Con gravedad
             fall = True
+            self.__collide_in_floor = 'wait'
         #print(self.__air_count)
         
         
@@ -206,6 +369,7 @@ class Player(pygame.sprite.Sprite):
             if fall == False:
                 #print('Iniciar Salto')
                 self.__jumping = True
+                get_sound( 'jump', None ).play()
                 #self.__gravity_current = -(
                     #self.rect.height*(self.gravity_power+(self.gravity_power/self.rect.height))
                     #self.rect.height*0.425
@@ -214,7 +378,8 @@ class Player(pygame.sprite.Sprite):
 
         # Gravedad | Agregar gravedad
         # Esto dependera si la función de salto no cancelo la gravedad, ya que la función de salto puede establecer la gravedad en 0
-        self.moving_xy[1] += self.__gravity_current
+        if dead == False:
+            self.moving_xy[1] += self.__gravity_current
         #print(self.moving_xy[1])
 
         # Gravedad | Caida
@@ -271,13 +436,15 @@ class Player(pygame.sprite.Sprite):
             hit_framesMultipler += 0.5
         else:
             hit_type[0] = 'arms'
-            hit_framesMultipler += 0.25
+            hit_framesMultipler += 0.3
 
 
         # Golpes | Tiempo hasta golpear
         '''
-        Cada 25% de segundo de juego se podra golpear.
-        25% de Fotogramas por segundo
+        El tiempo hasta llegar al golpe esta basado en la multiplicación de los "fps" del juego por la variable "hit_framesMultipler".
+        fps = 30
+        hit_framesMultipler = 0.3
+        tiempo = fps*hit_framesMultipler = 9
         '''
         if self.hit_normal == True:
             self.__hit_framesCount += 1
@@ -299,7 +466,6 @@ class Player(pygame.sprite.Sprite):
                 self.__hit_framesCount += 1
                 self.hit_normal = False
 
-        #print(self.__hit_framesCount)
         if self.__hit_framesCount >= fps*hit_framesMultipler:
             self.__hit_framesCount = 0
             self.hit_normal = True
@@ -348,8 +514,9 @@ class Player(pygame.sprite.Sprite):
 
                 hit = True
         
-        # Golpes Posicionar golpes y establecer su daño.
+        # Golpes | Posicionar golpes y establecer su daño.
         if hit == True:
+            get_sound( 'hits', None ).play()
             # Posicionar golpe y esablecer daño
             multipler_position_xy = [0, 0]
             kill_collide_hit = False
@@ -372,13 +539,23 @@ class Player(pygame.sprite.Sprite):
                 elif hit_type[1] == 'dash':
                     self.collide_hit.damage = 40
                     multipler_position_xy[0] = 5
+                    
+                if hit_type[3] == 'jump_or_fall':
+                    self.collide_hit.damage = self.collide_hit.damage*0.25
+                    multipler_position_xy[1] = 4.75
+                    multipler_position_xy[0] = multipler_position_xy[0]*0.5
+                    
 
             elif hit_type[0] == 'head':
                 self.collide_hit.damage = 30
-                multipler_position_xy[1] = -1
                 
-            if hit_type[3] == 'jump_or_fall':
-                kill_collide_hit = True
+                if hit_type[3] == 'jump_or_fall':
+                    multipler_position_xy[1] = -2
+                else:
+                    multipler_position_xy[1] = -1
+                
+            #if hit_type[3] == 'jump_or_fall':
+            #    kill_collide_hit = True
 
             if hit_type[2] == 'right':
                 self.collide_hit.rect.x += self.collide_hit.rect.width * multipler_position_xy[0]
@@ -415,71 +592,138 @@ class Player(pygame.sprite.Sprite):
         if not display_collision == None:
             self.rect.x = disp_width//2
             self.rect.y = disp_height//2
+        
+
+        # Colisionar Solido | Establecer daño al colisionar con el piso de un solido
+        if collided_side == 'bottom' and self.moving_xy[1] >= self.__gravity_limit:
+            damage = 5
+            damage_effect = True
+
+
+        # Daño | Establecer daño y hacer o no hacer el efecto de daño
+        if damage != 0:
+            self.hp -= damage
+            if damage_effect == True:
+                # Mover al jugador aleatoriamente:
+                # Su valor de movimiento sera en base al valor de altura multiplicado por daño probocado multiplicado por 0.01. Ya que el hp inicial es de 100, y 100 por 0.01 = 1
+                # Ejemplo: 32 * (10*0.01) = 3.2
+                move_value = self.rect.height*(damage*0.01)
+                self.moving_xy = [ 
+                    random.choice([move_value,-move_value]) , random.choice([move_value,-move_value])
+                ]
+
+                # Colsion Solidos | Moverse debido al daño recivido
+                collided_side = collide_and_move(obj=self, obj_movement=self.moving_xy, solid_objects=solid_objects)
+                
+                if collided_side == 'bottom':
+                    self.__gravity_current = 0
+                    self.__air_count = 0
+                else:
+                    self.__air_count += 1
+                
+                if collided_side == 'top':
+                    self.__gravity_current = 0
+                    
+                    self.__jumping = False
+                    self.__jump_count = 0
+
+            get_sound( 'hits', None ).play()
+        
 
         # Sprite | Animar | Establecer sprite actual
         # Collider | Colorear | Saltar o caer
         # Sprite | Animar | Saltar o caer 
         if self.__jumping == True:
             #print('Saltando')
-            self.surf.fill( generic_colors('blue') )
+            self.surf.fill( generic_colors('blue', self.transparency_collide) )
             if (
                 (self.move_right == False and self.move_left == False) or
                 (self.moving_xy[0] == 0)
             ):
-                self.__sprite.surf = sprite_list_player_not_move[1]
+                self.__sprite.surf = get_image('player_not-move', 1)
             else:
-                self.__sprite.surf = sprite_list_player_move[2]
+                self.__sprite.surf = get_image('player_move', 2)
         else:
             if fall == True:
                 #print('Con gravedad')
-                self.surf.fill( generic_colors('sky_blue') )
+                self.surf.fill( generic_colors('sky_blue', self.transparency_collide) )
                 if (
                     (self.move_right == False and self.move_left == False) or
                     (self.moving_xy[0] == 0)
                 ):
-                    self.__sprite.surf = sprite_list_player_not_move[2]
+                    self.__sprite.surf = get_image('player_not-move', 2)
                 else:
-                    self.__sprite.surf = sprite_list_player_move[4]
+                    self.__sprite.surf = get_image('player_move', 4)
             else:
                 #print('Sin gravedad')
-                self.surf.fill( generic_colors('green') )
+                self.surf.fill( generic_colors('green', self.transparency_collide) )
                 if (
                     (self.move_right == False and self.move_left == False) or
                     (self.moving_xy[0] == 0)
                 ):
-                    self.__sprite.surf = sprite_list_player_not_move[0]
+                    self.__sprite.surf = get_image('player_not-move', 0)
                 else:
-                    self.__sprite.surf = sprite_list_player_move[0]
+                    self.__sprite.surf = get_image('player_move', 0)
         
+
+        # Sonido | Contador de pasos | Caida
         # Sprite | Animar | Moverse en eje x, correr o caminar.
-        if fall == False and self.moving_xy[0] != 0 and self.__hit_framesCount == 0:
-            if self.__walking == False:
-                self.__sprite_current_frame += 0.75
+        if fall == False and self.moving_xy[0] != 0:
+            if self.__hit_framesCount == 0:
+                if self.__walking == False:
+                    self.__sprite_current_frame += 0.75
+                else:
+                    self.__sprite_current_frame += 0.25
+    
+                if self.__sprite_current_frame >= ( len( all_images['player_move'] ) -1 ):
+                    self.__sprite_current_frame = 0
+    
+                current_frame = int(self.__sprite_current_frame)
+                self.__sprite.surf = get_image('player_move', current_frame)
+
+            # Contador de pasos
+            # Contar, Basado en la velocidad el jugador
+            if self.moving_xy[0] < 0:
+                number_ready = (self.moving_xy[0] / self.rect.height) *-4
             else:
-                self.__sprite_current_frame += 0.25
-            if self.__sprite_current_frame >= ( len(sprite_list_player_move) -1 ):
-                self.__sprite_current_frame = 0
-            current_frame = int(self.__sprite_current_frame)
-            self.__sprite.surf = sprite_list_player_move[current_frame]
+                number_ready = (self.moving_xy[0] / self.rect.height) *4
+            self.__step_count += number_ready
         
+            if self.__step_count >= 8:
+                get_sound( 'steps', None ).play()
+                self.__step_count = 0
+
+        else:
+            # Reiniciar contador de pasos
+            self.__step_count = 0
+            
+        if self.__collide_in_floor == 'yes':
+            get_sound( 'steps', None ).play()
+        
+
         # Sprite | Animar | Golpear a la gente.
-        if fall == False and self.__hit_framesCount > 0:
-            self.__sprite.surf = sprite_list_player_move[7]
+        if self.__hit_framesCount > 0:
+            # Prepararse para dar un golpe
+            if fall == True:
+                self.__sprite.surf = get_image('player_hit-type', 1)
+            else:
+                self.__sprite.surf = get_image('player_hit-type', 0)
 
         if hit == True:
+            # Golpes
             if hit_type[1] == 'neutral':
                 if hit_type[0] == 'arms':
-                    self.__sprite.surf = sprite_list_player_move[4]
+                    self.__sprite.surf = get_image('player_hit-type', 2)
                 elif hit_type[0] == 'legs':
-                    self.__sprite.surf = sprite_list_player_move[1]
+                    self.__sprite.surf = get_image('player_hit-type', 3)
             elif hit_type[1] == 'dash':
                 if hit_type[0] == 'arms':
-                    self.__sprite.surf = sprite_list_player_move[6]
+                    self.__sprite.surf = get_image('player_move', 6)
                 elif hit_type[0] == 'legs':
-                    self.__sprite.surf = sprite_list_player_move[2]
+                    self.__sprite.surf = get_image('player_move', 2)
                     
             if hit_type[0] == 'head':
-                self.__sprite.surf = sprite_list_player_move[7]
+                self.__sprite.surf = get_image('player_move', 2)
         
         # Sprite | Voltear
         if self.__move_x_positive == True:
@@ -487,9 +731,10 @@ class Player(pygame.sprite.Sprite):
         else:
             self.__sprite.surf = pygame.transform.flip( self.__sprite.surf, True, False )
         
-        # Sprite | Posicionar
+        # Sprite | Posicionar y establecer transparencia
         self.__sprite.rect.x = self.rect.x -(self.rect.width*1.5)
         self.__sprite.rect.y = self.rect.y -(self.rect.height)
+        self.__sprite.surf.set_alpha( self.transparency_sprite )
         layer_all_sprites.add( self.__sprite, layer=0)
 
 
@@ -553,6 +798,7 @@ class hit_object(pygame.sprite.Sprite):
 
 # Grupos de sprites
 layer_all_sprites = pygame.sprite.LayeredUpdates()
+transparency_all_sprites = pygame.sprite.Group()
 update_objects = pygame.sprite.Group()
 anim_objects = pygame.sprite.Group()
 
