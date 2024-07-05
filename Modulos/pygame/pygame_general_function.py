@@ -205,3 +205,189 @@ def obj_detect_collision(obj_main, obj_collide):
 
 
 
+
+# Relacionadas con la rotación:
+def divisor_number_list(number=0, divisor=0, multipler=1):
+    '''
+    Divide un valor entero o flotante a una lista
+    Ejemplo: dividir 8 en cuatro, devuelve = [2,2,2,2]
+    
+    multipler sirve para multiplicar un valor en cada numero de la lista
+    Ejemplo: dividir 8 en cuatro y multipler = -1, devuelve = [-2,-2,-2,-2]
+    
+    number=int, or float
+    divisor=int or float
+    multipler=int or float
+    
+    Devuelve: list
+    '''
+    # Dividir el numero
+    number_base = number/divisor
+    
+    # Listar el numero
+    list_number = []
+    for number in range(1, divisor+1):
+        list_number.append( number_base*number*multipler )
+    
+    # Devolver la lista de numeros
+    return list_number
+
+
+
+
+def rotate(rotate_number=0):
+    '''
+    Función que determina el valor de rotación.
+
+    Si esta función se pone en un bucle, el valor de rotación podra cambiar constantemente.
+    Ya que iria de 0 al limite positivo 360 o al limite negativo -360, y al llegar al limite ya sea el positivo o el negativo, su valor de rotación regresara a cero. (Tambien podemos llamarlos limites laterales)
+    
+    rotate_number = int, angulo de rotación
+    
+    Devuelve: rotate_number, angulo de rotación
+    rotate_number, puede cambiar al entrar en esta función
+    '''
+    # Determinar si el angulo de rotación no es igual a cero
+    if rotate_number > 0 or rotate_number < 0:
+        # Eestablecer limite valor minimo y maximo de angulo de rotación a: 360 y -360
+        if rotate_number > 360:
+            rotate_number = 360
+        elif rotate_number < -360:
+            rotate_number = -360
+    
+        # Determinar si el valor es igual al limite minimo o al maximo, establecer el angulo en cero.
+        if rotate_number == 360 or rotate_number == -360:
+            rotate_number = 0
+    
+    # Devolver el angulo de rotación
+    return rotate_number
+
+
+
+
+def rotate_to_good_angle(rotate_number=0, divisor=4):
+    '''
+    Establecer angulo a uno bueno-predeterminado, ejemplo:
+    si el angulo es menor a 90 grados, posicionar en 90 grados
+    si el angulo es menor a 180 grados, posicionar en 180 grados
+    si el angulo esmenor a 270 grados, posicionar en 270 grados
+    si el angulo es menor a 360 grados, posicionar en 360 grados
+    
+    divisor = int, divide 360 grados
+    rotate_number = int or float, numero actual de rotación
+    
+    Cambiando o no el valor de rotate_number se
+    Devuelve:
+    rotate_number
+    '''
+    # Determina si el valor de rotación actual es positivo o negativo
+    multipler = 1
+    if rotate_number > 0:
+        multipler = 1
+    elif rotate_number < 0:
+        multipler = -1
+
+    # Divisor de angulos disponibles a establecer
+    # divisor = divisor
+    angles = divisor_number_list( number=360, divisor=divisor, multipler=multipler )
+    angle_base = angles[0]
+    '''
+    angle_base = 360//divisor
+    angles = []
+    for number in range(1, divisor+1):
+        angles.append( angle_base*number*multipler )
+    '''
+        
+    # Determinar el angulo a posicionar
+    change_angle = None
+    if multipler == 1:
+        if rotate_number != 0 and rotate_number < angles[0]:
+            if change_angle == None:
+                change_angle = angles[0]
+        
+        for number in range(0, divisor):
+            if angles[number] != angle_base:
+                if rotate_number > angles[number-1] and rotate_number < angles[number]:
+                    if change_angle == None:
+                        change_angle = angles[number]
+        
+        if not change_angle == None:
+            rotate_number = change_angle
+
+    elif multipler == -1:
+        if rotate_number != 0 and rotate_number > angles[0]:
+            if change_angle == None:
+                change_angle = angles[0]
+        
+        for number in range(0, divisor):
+            if angles[number] != angle_base:
+                if rotate_number < angles[number-1] and rotate_number > angles[number]:
+                    if change_angle == None:
+                        change_angle = angles[number]
+        
+        if not change_angle == None:
+            rotate_number = change_angle
+
+    # Devolver el valor nuevo para el angulo
+    return rotate_number
+
+
+
+
+def rotate_image( image=None, rect=None, surf=None, rotate_number=0):
+    '''
+    Función para rotar imagen, centraliza y rota de forma adecuada la imagen
+    image = pygame.image.load
+    rect = pygame.Rect
+    surf = image
+    rotate_number = int or float
+    
+    - Esta función depende de la funciónes: rotate
+    
+    Devuelve, una lista con la superficie, el rect listo y el numero de rotación listo
+    '''
+    # Establecer valor de rotación de forma correcta.
+    rotate_number = rotate(rotate_number=rotate_number)
+
+    # Rotar imagen
+    if rotate_number != 0:
+        # Rotar imagen
+        surf = pygame.transform.rotate( image, rotate_number )
+    else:
+        # No rotar imagen
+        surf = image
+    
+    # Posicionar correctamente la imagen
+    rect = surf.get_rect( center=rect.center )
+    
+    # Devolver lo necesario en una lista
+    return [surf, rect, rotate_number]
+
+
+
+
+def rotate_image_to_good_angle(divisor=4, rotate_number=0, surf=None, rect=None, image=None):
+    '''
+    Posicionar en un lugar adecuado, por ejemplo:
+    si el sprite esta en un angulo menor a 90 grados, posicionar en 90 grados
+    si el sprite esta en un angulo menor a 180 grados, posicionar en 180 grados
+    si el sprite esta en un angulo menor a 270 grados, posicionar en 270 grados
+    si el sprite este en un angulo menor a 360 grados, posicionar en 360 grados
+    
+    - Esta función depende de la funciónes: rotate, rotate_to_good_angle, rotate_image
+    
+    divisor = int, divide 360 grados
+    rotate_number = int or float, valor de rotación actual
+    surf, rect = pygame.Surface, pygame.Rect
+    image = pygame.image.load
+    
+    devuelve: surf, rect, y rotate_number
+    '''
+    # Rotar a un buen angulo
+    rotate_number = rotate_to_good_angle(divisor=divisor, rotate_number=rotate_number)
+
+    # Rotar imagen ya con la posicion establecida
+    rotate = rotate_image(
+        image=image, rect=rect, surf=surf, rotate_number=rotate_number
+    )
+    return rotate[0], rotate[1], rotate_number
