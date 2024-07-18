@@ -1,3 +1,179 @@
+from .CF_info import *
+from .CF_data import *
+from Modulos.Modulo_Text import *
+from .pygame_general_function import *
+import pygame, os, random
+
+
+
+
+# Sonidos
+all_sounds = {
+    'steps':
+    [
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/steps/step-1.ogg') ),
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/steps/step-2.ogg') ),
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/steps/step-3.ogg') )
+    ],
+
+    'jump':
+    pygame.mixer.Sound( os.path.join(dir_audio, 'effects/jump.ogg') ),
+    
+    'hits':
+    [
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/hits/hit-1.ogg') ),
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/hits/hit-2.ogg') ),
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/hits/hit-3.ogg') )
+    ],
+    
+    'dead':
+    [
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/dead/dead-1.ogg') ),
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/dead/dead-2.ogg') ),
+        pygame.mixer.Sound( os.path.join(dir_audio, 'effects/dead/dead-3.ogg') )
+    ],
+}
+for key in all_sounds.keys():
+    sound_or_sounds = all_sounds[key]
+    if type( sound_or_sounds ) == list:
+        for sound in sound_or_sounds:
+            sound.set_volume( volume )
+    else:
+        sound_or_sounds.set_volume( volume )
+
+
+# Sonido | Función para devolver un sonido
+def get_sound( sound=None, number=None ):
+    # Detectar que los parametros esten correctos
+    error = False
+    if sound == None:
+        error = True
+    else:
+        sound_good = False
+        for key in all_sounds.keys():
+            if sound == key:
+                if sound_good == False:
+                    sound_good = True
+            
+        if sound_good == False:
+            error = True
+
+    if not number == None:
+        if number < 0:
+            error = True
+    
+    if error == True:
+        sound = 'steps'
+        number = 0
+    
+    # Devolver sonido | Establecer sonido final
+    if type( all_sounds[sound] ) == list:
+        if number == None:
+            sound_final = random.choice( all_sounds[sound] )
+        else:
+            sounds_number = len(all_sounds)-1
+            if number > sounds_number:
+                number = sounds_number
+            sound_final = all_sounds[sound][number]
+    else:
+        sound_final = all_sounds[sound]
+    
+    return sound_final
+
+
+
+
+# Sprites
+all_images = {}
+
+all_images.update( {
+    'stone':
+    pygame.transform.scale(
+        pygame.image.load( os.path.join(dir_sprites, 'floor/stone.png') ), 
+        (grid_square, grid_square)
+    ),
+    
+    'player':
+    Anim_sprite_set(
+        sprite_sheet = pygame.transform.scale(
+            pygame.image.load( os.path.join(dir_sprites, 'player/player.png') ),
+            (grid_square*4, grid_square)
+        ),
+        current_frame=None
+    ),
+
+    'player_move':
+    Anim_sprite_set(
+        sprite_sheet = pygame.transform.scale( 
+            pygame.image.load( os.path.join(dir_sprites, 'player/player_move.png') ),
+            (grid_square*16, grid_square*2)
+        ),
+        current_frame=None
+    ),
+
+    'player_not-move':
+    Anim_sprite_set(
+        sprite_sheet = pygame.transform.scale(
+            pygame.image.load( os.path.join(dir_sprites, 'player/player_not-move.png') ),
+            (grid_square*6, grid_square*2)
+        ),
+        current_frame=None
+    ),
+    
+    'player_hit-type':
+    Anim_sprite_set(
+        sprite_sheet = pygame.transform.scale(
+            pygame.image.load( os.path.join(dir_sprites, 'player/player_hit-type.png') ),
+            (grid_square*8, grid_square*2)
+        ),
+        current_frame=None
+    )
+
+} )
+
+def get_image(image=None, number=None):
+    # Detectar si la imagen es buena o no
+    error = False
+    if image == None:
+        error = True
+    else:
+        image_good = False
+        for key in all_images.keys():
+            if key == image:
+                if image_good == False:
+                    image_good = True
+        
+        if image_good == False:
+            error = True
+    
+    if not number == None:
+        if number < 0:
+            error = True
+    
+    if error == True:
+        image = 'player_not-move'
+        number = 0
+    
+    
+    # Devolver imagen | Establecer imagen
+    if type(all_images[image]) == list:
+        image_number = len( all_images[image] ) -1
+        if not number == None:
+            if number > image_number:
+                number = image_number
+            final_image = all_images[image][number]
+        else:
+            final_image = random.choice(
+                all_images[image]
+            )
+    else:    
+        final_image = all_images[image]
+
+    return final_image
+
+
+
+
 # Funciones de colisiones
 def collision_detect(rect, grids):
     '''

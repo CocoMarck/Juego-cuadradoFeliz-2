@@ -24,7 +24,6 @@ fps = 30
 volume = 0.05
 
 
-# Subdirectorios
-# dir_data es el directorio data.
-dir_sprites = os.path.join(dir_data, 'sprites')
-dir_audio = os.path.join(dir_data, 'audio')
+# Para mostrar o no sprite
+show_collide = True
+show_sprite = True

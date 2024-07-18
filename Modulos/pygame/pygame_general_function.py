@@ -334,17 +334,18 @@ def rotate_to_good_angle(rotate_number=0, divisor=4):
 
 
 
-def rotate_image( image=None, rect=None, surf=None, rotate_number=0):
+def obj_rotate_image( obj, image=None, rotate_number=0, center=True):
     '''
     Función para rotar imagen, centraliza y rota de forma adecuada la imagen
+    obj = pygame.sprite.Sprite()
+    obj.rect = pygame.Rect
+    obj.surf = image
     image = pygame.image.load
-    rect = pygame.Rect
-    surf = image
     rotate_number = int or float
     
     - Esta función depende de la funciónes: rotate
     
-    Devuelve, una lista con la superficie, el rect listo y el numero de rotación listo
+    Devuelve, rotate_number
     '''
     # Establecer valor de rotación de forma correcta.
     rotate_number = rotate(rotate_number=rotate_number)
@@ -352,21 +353,25 @@ def rotate_image( image=None, rect=None, surf=None, rotate_number=0):
     # Rotar imagen
     if rotate_number != 0:
         # Rotar imagen
-        surf = pygame.transform.rotate( image, rotate_number )
+        obj.surf = pygame.transform.rotate( image, rotate_number )
     else:
         # No rotar imagen
-        surf = image
+        obj.surf = image
     
     # Posicionar correctamente la imagen
-    rect = surf.get_rect( center=rect.center )
+    if rotate_number != 0 or rotate_number != 360:
+        if center == True:
+            obj.rect = obj.surf.get_rect( center=obj.rect.center )
+        else:
+            obj.rect = obj.surf.get_rect( )
     
-    # Devolver lo necesario en una lista
-    return [surf, rect, rotate_number]
+    # Devolver lo necesario
+    return rotate_number
 
 
 
 
-def rotate_image_to_good_angle(divisor=4, rotate_number=0, surf=None, rect=None, image=None):
+def obj_rotate_image_to_good_angle(obj, image=None, rotate_number=0, divisor=4):
     '''
     Posicionar en un lugar adecuado, por ejemplo:
     si el sprite esta en un angulo menor a 90 grados, posicionar en 90 grados
@@ -376,18 +381,51 @@ def rotate_image_to_good_angle(divisor=4, rotate_number=0, surf=None, rect=None,
     
     - Esta función depende de la funciónes: rotate, rotate_to_good_angle, rotate_image
     
+    obj = pygame.sprite.Sprite()
     divisor = int, divide 360 grados
     rotate_number = int or float, valor de rotación actual
-    surf, rect = pygame.Surface, pygame.Rect
+    obj_surf, obj_rect = pygame.Surface, pygame.Rect
     image = pygame.image.load
     
-    devuelve: surf, rect, y rotate_number
+    devuelve: rotate_number
     '''
     # Rotar a un buen angulo
     rotate_number = rotate_to_good_angle(divisor=divisor, rotate_number=rotate_number)
 
     # Rotar imagen ya con la posicion establecida
-    rotate = rotate_image(
-        image=image, rect=rect, surf=surf, rotate_number=rotate_number
+    rotate = obj_rotate_image(
+        obj=obj, image=image, rotate_number=rotate_number
     )
-    return rotate[0], rotate[1], rotate_number
+    
+    # Devolver lo necesario
+    return rotate_number
+
+
+
+
+# Funciones trigoneometricas
+def get_hypotenuse( x=None, y=None, root_number=True ):
+    '''
+    x, y (int or float) = Cateto opuesto, Cateto adyasente 
+    root_number = bool, para obtener el valor real o no de la hipotenusa
+    
+    Devolver: x^2 + y^2
+    '''
+    value = (x**2 + y**2)
+    if root_number == True:
+        value = value**(0.5)
+    return value
+
+
+
+
+def get_radian( angle=None, radio=None ):
+    '''
+    Angulo = int or float
+    Radio el circulo = int or float
+
+    En base al angulo de devolver el radian
+    '''
+    return (
+        ( radio*(angle/180) * 3.1416 ) / radio
+    )
