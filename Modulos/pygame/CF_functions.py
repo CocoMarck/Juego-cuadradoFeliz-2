@@ -279,3 +279,105 @@ def collide_and_move( obj=None, obj_movement=[0,0], solid_objects=None):
                 collided_side = 'top'
     
     return collided_side
+
+
+
+
+# Funcion del clima
+class GradiantColor():
+    def __init__(self, color=[155, 168, 187], divider=2, start_with_max_power=False, time=0):
+        '''
+        Divide un color rgb y con la funcion update, actualiza el color a uno de la lista, dependiendo si se ánade mas color, o se disminulle el color. Esto esta pensado para utilizarse en un bucle.
+        
+        color = [int, int, int] (min 0, max 255)
+        divider = int or float (recomend int)
+        start_with_max_power = bool
+        time = int
+        '''
+        super().__init__()
+        
+        # Listar colores | Obtener color de inico y color de fin
+        self.__color_list = divider_color_rgb( color=color, divider=divider )
+        self.__number_list = len(self.__color_list)-1
+        self.start_color = self.__color_list[0]
+        self.end_color = self.__color_list[self.__number_list]
+        
+        # Reducir colores
+        if start_with_max_power == True:
+            self.__color_number = self.__number_list
+            self.__reduce_color = True
+        else:
+            self.__color_number = 0
+            self.___reduce_color = False
+        self.current_color = self.__color_list[ self.__color_number ]
+        
+        # Tiempo de ejecución
+        self.__current_time = 0
+        self.__time = time
+    
+    def update(self):
+        # Tiempo de ejecución
+        self.__current_time += 1
+        if self.__current_time >= self.__time:
+            self.__current_time = 0
+            
+            # Cambiar color
+            self.current_color = self.__color_list[self.__color_number]
+            
+            # Aumentar color
+            if self.__reduce_color == False:
+                self.__color_number += 1
+                if self.__color_number >= self.__number_list:
+                    self.__reduce_color = True
+
+            # Disminuir color
+            elif self.__reduce_color == True:
+                self.__color_number -= 1
+                if self.__color_number <= 0:
+                    self.__reduce_color = False
+
+
+
+
+
+def divider_color_rgb(color=[255,255,255], divider=2):
+    '''
+    Dividir un color rgb, en varios colores rgb.
+    color = [int, int, int] (min 0, max 255)
+    divider = int or float (recomend int)
+    '''
+    # Detectar que el color rgb sea una lita aceptable, para cada valor en la lista
+    number = 0
+    for c in color:
+        if c < 0 or c > 255:
+            color[index] = 255
+        number += 1
+
+    if number < 0 or number > 3:
+        color = [255, 255, 255]
+    
+    # Detectar que divisor sea un valor aceptable, para cada valor en el rgb
+    for c in color:
+        if divider < 0 or divider> c:
+            divider = 1
+        else:
+            pass
+    
+    # Dividir valores | Lista de colores rgb
+    color_list = []
+
+    multipler = 0
+    for x in range(0, divider):
+        multipler += 1
+
+        # Agregar nuevo color rgb a la lista de colores final.
+        new_color = []
+        for c in color:
+            new_color.append( (c/divider)*multipler )
+        color_list.append( new_color )
+    
+    # Devuelve la lista de colores rgb final
+    return color_list
+
+
+#print( divider_color_rgb(color=[155, 168, 187], divider=16) )

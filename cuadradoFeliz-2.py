@@ -172,6 +172,14 @@ time_count_dead = 0
 
 
 
+# Clima
+color_backgraund = GradiantColor( 
+    color=[155, 168, 187], divider=16, start_with_max_power=True, time=fps
+)
+
+
+
+
 # Función Scroll/Camara
 scroll_float = [0,0]
 
@@ -205,7 +213,9 @@ while loop_game:
     
     
     # Mostrar fondo
-    display_scale.fill( (0, 0, 0) )
+    #display_scale.fill( (0, 0, 0) )
+    display_scale.fill( color_backgraund.current_color )
+    color_backgraund.update()
     
     # Función Jugador
     player.move()
