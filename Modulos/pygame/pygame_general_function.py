@@ -185,25 +185,6 @@ def Split_sprite(sprite_sheet, parts=4):
 
 
 
-def obj_detect_collision(obj_main, obj_collide):
-    collision_direction = None
-    if obj_main.rect.y == obj_collide.rect.y-(obj_main.rect.height):
-        # Colision arriba
-        collision_direction = 'collide_up'
-    elif obj_main.rect.y == obj_collide.rect.y+(obj_collide.rect.height):
-        # Colision abajo
-        collision_direction = 'collide_down'
-    elif obj_main.rect.x == obj_collide.rect.x-(obj_main.rect.width):
-        # Colision izquierda
-        collision_direction = 'collide_left'
-    elif obj_main.rect.x == obj_collide.rect.x+(obj_collide.rect.width):
-        # Collide derecha
-        collision_direction = 'collide_right'
-    
-    return collision_direction
-
-
-
 
 
 # Relacionadas con la rotación:
@@ -429,3 +410,18 @@ def get_radian( angle=None, radio=None ):
     return (
         ( radio*(angle/180) * 3.1416 ) / radio
     )
+    
+    
+
+
+# Funciones multiplos
+def calculate_multiplier( number_start=1, number_fin=24 ):
+    '''
+    Obtener el multiplicador por el cual un numero llega a otro.
+
+    Operación muy sencilla, dividir el numero desado por llegar por el numero de incio.
+    '''
+    if number_start == 0:
+        raise ValueError('number_start no puede ser cero')
+
+    return number_fin / number_start

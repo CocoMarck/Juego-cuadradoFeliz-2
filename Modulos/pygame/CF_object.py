@@ -5,11 +5,22 @@ import random
 
 
 
+# Contador jugador en el aire, basado en la resolucion de pantalla de juego.
+air_count_based_on_resolution = round(1920/disp_width)
+if air_count_based_on_resolution < 0:
+    air_count_based_on_resolution = 0
+elif air_count_based_on_resolution > 10:
+    air_count_based_on_resolution = 10
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(
         self, size=32, position=(0,0),
         show_collide=True, show_sprite=True, color_sprite=(153, 252, 152)
     ):
+        '''
+        Objeto del jugador
+        '''
         super().__init__()
         
         size_ready = (size//2, size)
@@ -38,9 +49,10 @@ class Player(pygame.sprite.Sprite):
         self.__pressed_run = K_LSHIFT
 
         self.__pressed_jump = K_SPACE
-        
+
         self.__key_hit_normal = K_a
         self.__key_hit_power = K_s
+        self.__key_dead = K_r
         self.__move_x_positive = True
         
         # Coliders adicionales
@@ -76,6 +88,7 @@ class Player(pygame.sprite.Sprite):
             )
         )
         layer_all_sprites.add( self.__sprite, layer=1)
+        char_objects.add(self)
         self.__sprite_current_frame = 0
         self.sprite_angle = 0
         
@@ -110,6 +123,8 @@ class Player(pygame.sprite.Sprite):
         pressed_hit_normal = pressed_keys[self.__key_hit_normal]
         pressed_hit_power = pressed_keys[self.__key_hit_power]
         
+        pressed_dead = pressed_keys[self.__key_dead]
+        
         # Accionar movimiento
         self.move_left = False
         self.move_right = False
@@ -141,6 +156,11 @@ class Player(pygame.sprite.Sprite):
             self.hit_normal = True
         if pressed_hit_power:
             self.hit_power = True
+            
+        # Reiniciar, matar jugador
+        if pressed_dead:
+            if self.hp > 0:
+                self.hp = -1
     
     def jump(self):
         if self.__gravity_current <= 0:
@@ -171,10 +191,7 @@ class Player(pygame.sprite.Sprite):
             self.__jump_count = self.__jump_max_height
             self.__gravity_current = 0
             
-            self.transparency_sprite = 0
-            self.__sprite.surf.set_alpha( 0 )
         else:
-            self.transparency_sprite = self.__transparency_sprite
             dead = False
         
         # Variables de daño
@@ -184,7 +201,11 @@ class Player(pygame.sprite.Sprite):
         
         # Detectar si esta en el piso o no. 
         # Esto se determina dependiendo la cantidad de frames en las que el jugador esta en el aire.
-        if self.__air_count <= 2: # 5 para que funcione en la resolucion mas baja "128x72"
+        # 2 funciona en resoluciones altas, 960x560 a 1920x1080
+        # 5 funciona en resolucines bajas, 256x144 a 512x288
+        # Entre mas alto, mejor funciona en res bajas, y entre mas bajo mejor funciona en res altas
+        #if self.__air_count <= 2: # Antes 5 para que funcione en la resolucion mas baja "128x72"
+        if self.__air_count <= air_count_based_on_resolution: # Nuevo, funcional. 1920, seria la res maxima.
             # En el piso | Sin gravedad
             fall = False
             if self.__collide_in_floor == 'wait':
@@ -437,18 +458,41 @@ class Player(pygame.sprite.Sprite):
             self.__jumping = False
             self.__jump_count = 0
         
-        # Colisión | Pantalla
-        display_collision = obj_not_see(disp_width, disp_height, obj=self, difference=0, reduce_positive=False)
-        if not display_collision == None:
-            self.hp = 0
-            #self.rect.x = disp_width//2
-            #self.rect.y = disp_height//2
         
+        # Colision | Cajas
+        for box in box_objects:
+            if self.rect.colliderect( box.rect ):
+                # Top
+                if self.rect.y <= box.rect.y -(box.rect.height/2):
+                    self.__gravity_current = 0
+                    self.__air_count = 0
+                    if not self.rect.y == box.rect.y -self.rect.height:
+                        self.rect.y = box.rect.y -self.rect.height
+                    collided_side = 'bottom'
 
+                # Bottom | Daño
+                if box.moving_xy[1] >= self.__gravity_limit:
+                    damage = 5
+                    damage_effect = True
+                elif box.moving_xy[1] >= self.__gravity_limit/4:
+                    damage_effect = True
+                if damage_effect == True:
+                    self.__gravity_current = -self.rect.width/2
+                    collide_and_move(obj=self, obj_movement=self.moving_xy, solid_objects=solid_objects)
+                        
+                        
         # Daño | Colisionar Solido | Establecer daño al colisionar con el piso de un solido
         if collided_side == 'bottom' and self.moving_xy[1] >= self.__gravity_limit:
             damage = 5
             damage_effect = True
+            
+            
+        # Colisión | Pantalla
+        display_collision = obj_not_see(disp_width, disp_height, obj=self, difference=0, reduce_positive=False)
+        if not display_collision == None:
+            pass#self.hp = 0
+            #self.rect.x = disp_width//2
+            #self.rect.y = disp_height//2
         
 
         # Sprite | Animar | Establecer sprite actual
@@ -654,7 +698,10 @@ class Player(pygame.sprite.Sprite):
             
             
         # Sprite | Establecer transparencia al sprite
-        self.__sprite.surf.set_alpha( self.transparency_sprite )
+        if dead == False:
+            self.__sprite.surf.set_alpha( self.transparency_sprite )
+        else:
+            self.__sprite.surf.set_alpha( 0 )
 
     
     
@@ -706,6 +753,7 @@ class Stone(pygame.sprite.Sprite):
     
     def update(self):
         self.surf.fill( generic_colors('grey', self.transparency_collide) )
+        self.__sprite.surf.set_alpha( self.transparency_sprite )
 
         destroy = False
         if self.hp <= 0:
@@ -713,13 +761,7 @@ class Stone(pygame.sprite.Sprite):
         
         # Quitar vida al solido, solo si los golpes destruyen solidos.
         # Destruir solido si se le acabo el hp.
-        if destroy == False:
-            for obj in damage_objects:
-                if self.rect.colliderect( obj.rect ):
-                    if obj.destroy_solids == True:
-                        self.hp -= obj.damage
-                        print(self.hp)
-        else:
+        if destroy == True:
             self.__sprite.kill()
             self.kill()
 
@@ -727,7 +769,7 @@ class Stone(pygame.sprite.Sprite):
 
 
 class hit_object(pygame.sprite.Sprite):
-    def __init__(self, size=8, position=(0,0), damage=4):
+    def __init__(self, size=grid_square, position=(0,0), damage=4):
         super().__init__()
         '''
         Collider que hace daño, sus parametros determinaran su daño y a que le hace daño.
@@ -747,25 +789,436 @@ class hit_object(pygame.sprite.Sprite):
     def update(self):
         for solid in solid_objects:
             if self.rect.colliderect( solid.rect ):
-                print(f'Quita -{self.damage}')
+                Particle( 
+                    size=self.rect.width, position=(self.rect.x, self.rect.y), color='grey',
+                    show_collide=True, time_kill=fps
+                )
+                if self.destroy_solids == True:
+                    print(f'Quita -{self.damage}')
+                    solid.hp -= self.damage
+        
+        for box in box_objects:
+            if self.rect.colliderect( box.rect ):
+                Particle( 
+                    size=self.rect.width, position=(self.rect.x, self.rect.y), color=[227,112,228],
+                    show_collide=True, time_kill=fps
+                )
+                box.hp -= self.damage
+                box.damage_effect = True
 
 
 
 
-class box(pygame.sprite.Sprite):
-    def __init__(self):
+class Box(pygame.sprite.Sprite):
+    def __init__(self, size=[grid_square, grid_square], position=(0,0), spawning=False):
         super().__init__()
         '''
         Una caja que puede rotarse y ser destruida a trancazos.
         '''
+        # Valor de transparensia
+        self.transparency_collide = 255
+        self.transparency_sprite = 0
+        self.spawn_xy = position
+        self.spawning = spawning
+        
+        # Collider
+        self.surf = pygame.Surface( size, pygame.SRCALPHA )
+        self.surf.fill( generic_colors('blue') )
+        self.rect = self.surf.get_rect( topleft=position )
+        layer_all_sprites.add( self, layer=1)
+        transparency_all_sprites.add(self)
+        #solid_objects.add( self )
+        box_objects.add( self )
+        update_objects.add( self )
+        item_objects.add(self)
+        
+        # Sprite
+        self.__image = get_image('elevator')
+        self.__sprite = pygame.sprite.Sprite()
+        self.__sprite.surf = self.__image
+        self.__sprite.rect = self.__sprite.surf.get_rect( topleft=position )
         self.sprite_angle = 0
-    
+        layer_all_sprites.add( self.__sprite, layer=0)
+        
+        # Variables de estadisticas
+        self.hp = 100
+        self.damage_effect = False
+        
+        # Variables de movimiento
+        self.gravity_power = size[0]*0.025
+        self.gravity_limit = size[0]*0.75
+        self.__gravity_current = 0
+        self.__air_count = 0 # Para que inicie en caida
+        
+        self.moving_xy = [0,0]
+        self.__move_x_positive = True
+        self.__rotate = False
     
     def update(self):
-        pass
+        # Transparencia de collider y sprite
+        self.surf.set_alpha(self.transparency_collide)
+        self.__sprite.surf.set_alpha(self.transparency_sprite)
     
+        # Detectar si esta callanedo o no
+        if self.__air_count <= air_count_based_on_resolution:
+            fall = False
+        else:
+            fall = True
+            
+        # Gravedad 
+        self.moving_xy[1] = self.__gravity_current
+        if self.__gravity_current < self.gravity_limit:
+            self.__gravity_current += self.gravity_power
+        else:
+            self.__gravity_current = self.gravity_limit
+            
+            
+        # Colision | Mover | Solidos y Cajas
+        objects = []
+        for box in box_objects:
+            if not box == self:
+                objects.append(box)
+        for solid in solid_objects:
+            objects.append(solid)
+
+        collided_side = collide_and_move(
+            obj=self, obj_movement=self.moving_xy, solid_objects=objects
+        )
+        self.__air_count += 1
+        if collided_side == 'bottom':
+            self.__gravity_current = 0
+            self.__air_count = 0
+        else:
+            pass
+        
+        
+        # Player/Personaje/Player Mover caja
+        self.moving_xy[0] = 0
+        if fall == False:
+            self.sprite_angle = obj_rotate_image_to_good_angle(
+                obj=self.__sprite, image=self.__image, rotate_number=self.sprite_angle, divisor=4
+            )
+            for char in char_objects:
+                if self.rect.colliderect( char.rect ):
+                    # Colisionar con un objeto tipo personaje/npc/player
+                    if char.moving_xy[0] > 0 or char.moving_xy[0] < 0:
+                        self.moving_xy[0] = char.moving_xy[0]
+                        char.rect.x -= char.moving_xy[0]
+                        if char.moving_xy[0] > 0:
+                            self.__move_x_positive = True
+                        elif char.moving_xy[0] < 0:
+                            self.__move_x_positive = False
+                        collide_and_move(
+                            obj=self, obj_movement=self.moving_xy, solid_objects=objects
+                        )
+                    #char.rect.x += random.choice( [char.moving_xy[1], -char.moving_xy[1]] )
+                    #if char.moving_xy[1] != 0:
+                    #    char.rect.y -= char.moving_xy[1]
+        else:
+            self.rotate()
+            
+        #print(self.sprite_angle)
+        
+        # Daño
+        if self.damage_effect == True:
+            movement = [
+                random.choice( [self.rect.width/4, -self.rect.width/4] ),
+                random.choice( [0, -self.rect.height/4] )
+            ]
+            collide_and_move(
+                obj=self, 
+                obj_movement=movement,
+                solid_objects=objects
+            )
+            self.damage_effect = False
+        
+        # Mover imagen
+        self.__sprite.rect.x = (
+            self.rect.x +
+            -(self.__sprite.rect.width -self.rect.width)/2
+        )
+        self.__sprite.rect.y = (
+            self.rect.y +
+            -(self.__sprite.rect.height -self.rect.height)/2
+        )
+        
+        # Eliminar objeto si llega a -1 de hp
+        if self.hp <= 0:
+            if self.transparency_sprite > 0:
+                split_image = Split_sprite( self.__image, parts=4 )
+            else:
+                split_image = [None, None, None, None]
+            Particle(
+                size=self.rect.width/2, show_collide=False, color='green', image=split_image[0],
+                position = (self.rect.x, self.rect.y), time_kill=fps*4
+            )
+            Particle(
+                size=self.rect.width/2, show_collide=False, color='blue', image=split_image[1],
+                position = (self.rect.x+self.rect.width/2, self.rect.y), time_kill=fps*4
+            )
+            Particle(
+                size=self.rect.width/2, show_collide=False, color='red', image=split_image[2],
+                position = (self.rect.x, self.rect.y+self.rect.width/2), time_kill=fps*4
+            )
+            Particle(
+                size=self.rect.width/2, show_collide=False, color='yellow', image=split_image[3],
+                position = (self.rect.x+self.rect.width/2, self.rect.y+self.rect.width/2), time_kill=fps*4
+            )
+            
+            if self.spawning == True:
+                self.rect.x = self.spawn_xy[0]
+                self.rect.y = self.spawn_xy[1]
+                self.hp = 100
+            else:
+                self.__sprite.kill()
+                self.kill()
+        
     def rotate(self):
-        pass
+        self.sprite_angle = obj_rotate_image( 
+            obj=self.__sprite, image=self.__image, rotate_number=self.sprite_angle, center=True
+        )
+        if self.__move_x_positive == True:
+            self.sprite_angle -= 25
+        else:
+            self.sprite_angle += 25
+
+
+
+
+class Limit(pygame.sprite.Sprite):
+    def __init__(self, size=grid_square, position=(0,0) ):
+        super().__init__()
+        '''
+        Un objeto que permite establecer el limite de la camara.
+        '''
+        # Valor de transparensia
+        self.transparency_collide = 255
+        self.transparency_sprite = 0
+        
+        # Sprite
+        self.surf = pygame.Surface( (size, size), pygame.SRCALPHA )
+        self.rect = self.surf.get_rect( topleft=position  )
+        layer_all_sprites.add(self, layer=2)
+        update_objects.add(self)
+        transparency_all_sprites.add(self)
+        limit_objects.add(self)
+    
+    def update(self):
+        self.surf.fill( generic_colors('red', self.transparency_collide) )
+
+
+
+
+class Particle(pygame.sprite.Sprite):
+    def __init__(
+        self, size=grid_square/8, position=(0,0), color='green', image=None,
+        show_collide=True, time_kill=0
+    ):
+        super().__init__()
+        '''
+        Objecto que puede colisionar y tiene una función visual.
+        '''
+        # Varibles relacionadas con collide y image
+        if show_collide == True:
+            self.transparency_collide=255
+        else:
+            self.transparency_collide=0
+        self.__show_colide = show_collide
+        self.transparency_sprite=255
+        
+        # Posición del collider y imagen
+        self.__color = color
+        if type(color) == str:
+            self.__generic_color = True
+        else:
+            self.__generic_color = False
+            if self.__show_colide == False:
+                self.__color.append(self.transparency_collide)
+            else:
+                self.__color.append(255)
+
+        if image == None:
+            self.__image = False
+            # Collider
+            self.surf = pygame.Surface( (size, size), pygame.SRCALPHA )
+
+            if self.__generic_color == True:
+                self.surf.fill( generic_colors(self.__color, self.transparency_collide) )
+            else:
+                self.surf.fill( self.__color )
+
+            self.rect = self.surf.get_rect( topleft=position )
+            layer_all_sprites.add(self, layer=1)
+        else: 
+            self.__image = True
+            # Imagen
+            self.surf = image
+            self.surf.set_alpha( self.transparency_sprite )
+            self.rect = self.surf.get_rect( topleft=position )
+            layer_all_sprites.add(self, layer=0)
+
+        transparency_all_sprites.add(self)
+        update_objects.add(self)
+        
+        # Variables de movimiento
+        self.gravity_power = random.choice( [ size*0.025, size*0.05 ] )
+        self.gravity_limit = size*0.75
+        self.__gravity_current = -self.gravity_power # Para que inicie callendo
+        self.__air_count = 8 # 8 Para que inice en caida
+        self.gravity = True
+        
+        self.jump_power = random.choice( [size*0.25, size*0.5] )
+        
+        self.moving_xy = [0,0]
+        self.not_move = False
+        self.speed = random.choice( [ size*0.125, size*0.25, size*0.4 ] )
+        self.jumping = random.choice( [True, False] )
+        self.x_positive = random.choice( [False, True] )
+        
+        
+        # Tiempo para eliminar la particula
+        if time_kill <= 0:
+            self.__kill = False
+            self.__time_kill = 0
+        else:
+            self.__kill = True
+            self.__time_kill = time_kill
+        self.__time_count = 0
+
+        
+    def update(self):
+        if self.__image == False:
+            # Colorear collider
+            if self.__show_colide == False:
+                if self.__generic_color == True:
+                    self.surf.fill( generic_colors(self.__color, self.transparency_collide) )
+                else:
+                    self.surf.fill( self.__color )
+            else:
+                if self.__generic_color == True:
+                    self.surf.fill( generic_colors(self.__color, 255) )
+                else:
+                    self.surf.fill( self.__color )
+        else:
+            # Transparencia de imagen
+            self.surf.set_alpha( self.transparency_sprite )
+            
+        # Mover
+        if self.not_move == False:
+            if self.x_positive == True:
+                self.moving_xy[0] = self.speed
+            else:
+                self.moving_xy[0] = -self.speed
+        
+        # Detectar si esta callendo o no
+        if self.__air_count <= air_count_based_on_resolution:
+            fall = False
+        else:
+            fall = True
+            
+        # Salto
+        if fall == False:
+            self.__gravity_current = -self.jump_power
+        if self.jumping == True:
+            self.jumping = False
+            self.__gravity_current = -self.jump_power
+
+        # Gravedad
+        if self.gravity == True:
+            self.moving_xy[1] = self.__gravity_current
+            if self.__gravity_current < self.gravity_limit:
+                self.__gravity_current += self.gravity_power
+            else:
+                self.__gravity_current = self.gravity_limit
+                
+                
+        # Mover y colisionar
+        '''
+        self.rect.x += self.moving_xy[0]
+        self.rect.y += self.moving_xy[1]
+        collided_side = detect_collision( self, self.moving_xy, solid_objects, dimension='x' )
+        if collided_side == 'right':
+            self.x_positive = False
+        elif collided_side == 'left':
+            self.x_positive = True
+        
+        collided_side = detect_collision( self, self.moving_xy, solid_objects, dimension='y' )
+        self.__air_count += 1
+        if collided_side == 'top':
+            self.__gravity_current = 0
+            self.__air_count = 0
+        elif collided_side == 'bottom':
+            self.__gravity_current = 0
+        '''
+        #'''
+        collided_side = collide_and_move( 
+            obj=self, obj_movement=self.moving_xy, solid_objects=solid_objects 
+        )
+        self.__air_count += 1
+        if collided_side == 'bottom':
+            self.__gravity_current = 0
+            self.__air_count = 0
+        elif collided_side == 'top':
+            self.__gravity_current = 0
+        elif collided_side == 'right':
+            self.x_positive = False
+        elif collided_side == 'left':
+            self.x_positive = True
+        #'''
+        
+        # Elimitar particula
+        if self.__kill == True:
+            self.__time_count += 1
+            if self.__time_count >= self.__time_kill:
+                self.kill()
+
+
+
+
+class Player_dead():
+    def __init__(self, player, show_collide=False):
+        super().__init__()
+        '''
+        Objeto que genera otros objetos de particulo, que tendran la función de mostrar la muerte del jugador.
+        '''
+        # Tamaño y posicion inicial
+        size = player.rect.height/2
+        position_xy = [player.rect.x-player.rect.width/2, player.rect.y]        
+        if show_collide == False:
+            image_split = Split_sprite( get_image('player', 0), 4)
+        else:
+            image_split = [None, None, None, None]
+        image_part_1 = image_split[0]
+        image_part_2 = image_split[1]
+        image_part_3 = image_split[2]
+        image_part_4 = image_split[3]
+        
+        # Partes
+        self.part_1 = Particle( 
+            size=size, position=(position_xy[0], position_xy[1]), color='green',
+            show_collide=show_collide, image=image_part_1
+        )  
+
+        self.part_2 = Particle( 
+            size=size, position=(position_xy[0]+size, position_xy[1]), color='red',
+            show_collide=show_collide, image=image_part_2
+        )
+
+        self.part_3 = Particle(
+            size=size, position=(position_xy[0], position_xy[1]+size), color='black',
+            show_collide=show_collide, image=image_part_3
+        )
+
+        self.part_4 = Particle( 
+            size=size, position=(position_xy[0]+size, position_xy[1]+size), color='yellow', 
+            show_collide=show_collide, image=image_part_4
+        )
+    
+    def kill(self):
+        self.part_1.kill()
+        self.part_2.kill()
+        self.part_3.kill()
+        self.part_4.kill()
 
 
 
@@ -775,6 +1228,10 @@ layer_all_sprites = pygame.sprite.LayeredUpdates()
 transparency_all_sprites = pygame.sprite.Group()
 update_objects = pygame.sprite.Group()
 anim_objects = pygame.sprite.Group()
+limit_objects = pygame.sprite.Group()
+char_objects = pygame.sprite.Group()
+item_objects = pygame.sprite.Group()
+box_objects = pygame.sprite.Group()
 
 solid_objects = pygame.sprite.Group()
 damage_objects = pygame.sprite.Group()

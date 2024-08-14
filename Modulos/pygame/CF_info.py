@@ -4,9 +4,9 @@ from .CF_data import *
 pygame.init()
 
 # Resoluciones compatibles (16:9):
-# 1920x1080
-# 1024x576
-# 960x540
+# 1920x1080 Funciona
+# 1024x576 Funciona
+# 960x540 Funciona
 # 512x288
 # 384x216
 # 256x144
@@ -25,5 +25,5 @@ volume = 0.05
 
 
 # Para mostrar o no sprite
-show_collide = True
+show_collide = False
 show_sprite = True

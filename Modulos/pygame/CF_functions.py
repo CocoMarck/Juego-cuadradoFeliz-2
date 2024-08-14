@@ -87,9 +87,21 @@ def get_sound( sound=None, number=None ):
 all_images = {}
 
 all_images.update( {
+    'background':
+    pygame.transform.scale(
+        pygame.image.load( os.path.join(dir_sprites, 'background.png') ), 
+        (disp_width, disp_height)
+    ),
+
     'stone':
     pygame.transform.scale(
         pygame.image.load( os.path.join(dir_sprites, 'floor/stone.png') ), 
+        (grid_square, grid_square)
+    ),
+    
+    'elevator':
+    pygame.transform.scale(
+        pygame.image.load( os.path.join(dir_sprites, 'floor/elevator.png') ), 
         (grid_square, grid_square)
     ),
     
@@ -283,9 +295,74 @@ def collide_and_move( obj=None, obj_movement=[0,0], solid_objects=None):
 
 
 
+def detect_limit(
+    obj, player, player_spawn_xy=None, scroll_float=None,
+    not_scroll_xy=None, grid_square=None, disp_width=None, disp_height=None
+):
+    '''
+    Función objetos que limitan la camara/scroll, para detectar la posición del limite y detectar si el scroll esta sobrepasando el limite y entonces parar el scroll.
+    '''
+    # Limite positivo x
+    if obj.rect.x >= disp_width:
+        if scroll_float[0] >= obj.rect.x-(disp_width):
+            if player.moving_xy[0] < 0:
+                # Cuando quiere salir del limite positivo
+                if not player.rect.x <= obj.rect.x-(disp_width/2):
+                    not_scroll_xy[0] = True
+            else:
+                # Cuando llega al limite positivo
+                not_scroll_xy[0] = True
+                
+    # Limite negativo x
+    if obj.rect.x <= 0:
+        if scroll_float[0] <= obj.rect.x:
+            if player.moving_xy[0] > 0:
+                # Cuando quiere salir del limite negativo
+                if not player.rect.x >= obj.rect.x+disp_width/2:
+                    not_scroll_xy[0] = True
+            else:
+                # Cuando llega al limite negativo
+                not_scroll_xy[0] = True
+    
+    
+    # Limite positivo y
+    if obj.rect.y >= disp_height-grid_square:
+        if scroll_float[1] >= obj.rect.y-(disp_height):
+            if player.moving_xy[1] < 0:
+                # Cuando quiere salir del limite positivo
+                if not player.rect.y <= obj.rect.y-(disp_height/2):
+                    not_scroll_xy[1] = True
+            else:
+                # Cuando llega al limite positivo
+                not_scroll_xy[1] = True
+                
+    # Limite negativo y
+    if obj.rect.y <= 0:
+        if scroll_float[1] <= obj.rect.y:
+            if player.moving_xy[1] > 0:
+                # Cuando quiere salir del limite negativo
+                if not player.rect.y >= obj.rect.y+disp_height/2:
+                    not_scroll_xy[1] = True
+            else:
+                # Cuando llega al limite negativo
+                not_scroll_xy[1] = True
+
+    # Restablecer camara al spawn
+    # volver a anlizar los limites, para que se acomode al 100% bien
+    if player.rect.x == player_spawn_xy[0] and player.rect.y == player_spawn_xy[1]:
+        not_scroll_xy = [False, False]
+    
+    # Devolver el mover el scroll en x o en y.
+    return not_scroll_xy
+
+
+
+
 # Funcion del clima
 class GradiantColor():
-    def __init__(self, color=[155, 168, 187], divider=2, start_with_max_power=False, time=0):
+    def __init__(
+        self, color=[155, 168, 187], transparency=255, divider=2, start_with_max_power=False, time=0
+    ):
         '''
         Divide un color rgb y con la funcion update, actualiza el color a uno de la lista, dependiendo si se ánade mas color, o se disminulle el color. Esto esta pensado para utilizarse en un bucle.
         
@@ -313,7 +390,8 @@ class GradiantColor():
         
         # Tiempo de ejecución
         self.__current_time = 0
-        self.__time = time
+
+        self.__time = calculate_multiplier( number_start=divider, number_fin=time )
     
     def update(self):
         # Tiempo de ejecución
@@ -381,3 +459,34 @@ def divider_color_rgb(color=[255,255,255], divider=2):
 
 
 #print( divider_color_rgb(color=[155, 168, 187], divider=16) )
+
+
+
+
+
+def detect_collision( obj, obj_movement=[0,0], colliders=None, dimension=None ):
+    '''
+    Detecta la direccion en la que colisiona un objeto con otro
+    Y Dependiendo de eso, posiciona el jugador en un lado o en otro.
+    '''
+    collided_side = None
+    
+    if dimension == 'x' or dimension == None:
+        for collide in colliders:
+            if obj.rect.colliderect( collide.rect ):
+                if obj_movement[0] > 0:
+                    collided_side = 'right'
+                elif obj_movement[0] < 0:
+                    collided_side = 'left'
+
+    if dimension == 'y' or dimension == None:
+        for collide in colliders:
+            if obj.rect.colliderect( collide.rect ):
+                if obj_movement[1] > 0:
+                    collided_side = 'top'
+                elif obj_movement[1] < 0:
+                    collided_side = 'bottom'
+                    if obj.rect.y > collide.rect.y+obj.rect.height:
+                        obj.rect.bottom = collide.rect.bottom+obj.rect.height
+    
+    return collided_side
