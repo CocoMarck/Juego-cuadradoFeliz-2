@@ -1,11 +1,11 @@
 # Importar | Información de juego
-from Modulos.pygame.CF_info import *
+from data.Functions.CF_info import *
 
 # Importar | Objetos
-from Modulos.pygame.CF_object import *
+from Modulos.Functions.pygame.CF_object import *
 
 # Importar | Funciones especificas para este juego
-from Modulos.pygame.CF_functions import *
+from Modulos.Functions.pygame.CF_functions import *
 
 # Importar | Pygame y necesario
 import pygame
@@ -19,6 +19,18 @@ from pygame.locals import *
 pygame.display.set_caption( title )
 display = pygame.display.set_mode( DISPLAY_SIZE )
 clock = pygame.time.Clock()
+
+
+
+# Fuentes de texto
+size_font_normal = int(grid_square/2)
+size_font_big = int(grid_square*2)
+font_str = 'monospace'
+font_normal = pygame.font.SysFont( font_str, size_font_normal )
+font_big = pygame.font.SysFont( font_str, size_font_big )
+
+
+
 
 # Para Escalar todo en pantalla
 display_scale = pygame.Surface( (disp_width*1, disp_height*1) )
@@ -43,6 +55,8 @@ class Map():
         f = Piso
         . = Espacio
         | = Limitador de camara
+        [ = Escalaera horizontal Izq
+        ] = Escalaera horizontal Der
 
         Parametros adicionales del mapa:
         $path = Directorio de trabajo, Si esta en None, se establecera uno defaul "./data/maps/"
@@ -119,8 +133,10 @@ class Map():
         p = Player
         f = Plataforma, Piso
         b = Caja
+        [ = Escalara horizontal Izq
+        ] = Escalara horizontal Der
         '''
-        prefix_obj = '|.pfb'
+        prefix_obj = '|.pfb[]'
         file_text_prefix = []
         for line in file_text_ignore:
             new_line = ''
@@ -175,6 +191,23 @@ class Map():
                             (grid_square*x_multipler), (grid_square*y_multipler)
                         )
                     )
+                
+                elif char == '[':
+                    # Esclara horizontal Izq
+                    Stair(
+                        size=grid_square,
+                        position=(
+                            (grid_square*x_multipler), (grid_square*y_multipler)
+                        ), direction='left'
+                    )
+                elif char == ']':
+                    # Esclara horizontal Izq
+                    Stair(
+                        size=grid_square,
+                        position=(
+                            (grid_square*x_multipler), (grid_square*y_multipler)
+                        ), direction='right'
+                    )
 
                 # Aumentar Coordenada x
                 x_multipler += 1
@@ -202,6 +235,10 @@ time_count_dead = 0
 color_backgraund = GradiantColor( 
     color=[155, 168, 187], divider=16, start_with_max_power=True, time=fps*120
 )
+if show_sprite == True:
+    color_backgound_transparency = 127
+else:
+    color_backgound_transparency = 255
 
 
 
@@ -233,6 +270,9 @@ limit_xy = [ max(limit_xy[0]),  max(limit_xy[1]) ]
 
 
 # Función | Para establecer transparensia a los objetos
+'''
+Mejor, directamente cambiar la transparencia con un "set_alpha"
+'''
 if show_collide == True:
     value_show_collide = 127
 else:
@@ -262,12 +302,13 @@ while loop_game:
     
     
     # Mostrar fondo
-    display_scale.blit( background_image, (0,0) )
+    if show_sprite == True:
+        display_scale.blit( background_image, (0,0) )
 
     color = []
     for x in color_backgraund.current_color:
         color.append(x)
-    color.append(127)
+    color.append(color_backgound_transparency)
     background_color.fill( color )
     display_scale.blit( background_color, (0,0) )
     color_backgraund.update()
@@ -368,6 +409,39 @@ while loop_game:
                 sprite.rect.y -scroll_int[1]
             )
         )
+    
+    
+
+    # Sección del texto del juego (Interfaz/HUD)
+    text_hp = font_normal.render(
+        str(player.hp), True, generic_colors('green')
+    )
+    display_scale.blit(
+        text_hp, (
+            (disp_width)-(size_font_normal*3),
+            size_font_normal
+        )
+    )
+    
+    text_stamina = font_normal.render(
+        str(player.stamina), True, generic_colors('blue')
+    )
+    display_scale.blit(
+        text_stamina, (
+            (disp_width)-(size_font_normal*3),
+            size_font_normal*2
+        )
+    )
+    
+    text_score = font_normal.render(
+        str(player.score), True, generic_colors('yellow')
+    )
+    display_scale.blit(
+        text_score, (
+            (disp_width)-(size_font_normal*3),
+            size_font_normal*3
+        )
+    )
     
     
     

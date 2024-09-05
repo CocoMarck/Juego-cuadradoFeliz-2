@@ -126,24 +126,6 @@ all_images.update( {
         ),
         current_frame=None
     ),
-
-    'player_move':
-    Anim_sprite_set(
-        sprite_sheet = pygame.transform.scale( 
-            pygame.image.load( os.path.join(dir_sprites, 'player/player_move.png') ),
-            (grid_square*16, grid_square*2)
-        ),
-        current_frame=None
-    ),
-
-    'player_not-move':
-    Anim_sprite_set(
-        sprite_sheet = pygame.transform.scale(
-            pygame.image.load( os.path.join(dir_sprites, 'player/player_not-move.png') ),
-            (grid_square*6, grid_square*2)
-        ),
-        current_frame=None
-    ),
     
     'player_hit-type':
     Anim_sprite_set(
