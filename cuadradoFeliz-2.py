@@ -1,11 +1,11 @@
 # Importar | Información de juego
-from data.Functions.CF_info import *
+from data.CF_info import *
 
 # Importar | Objetos
-from Modulos.Functions.pygame.CF_object import *
+from logic.pygame.CF_object import *
 
 # Importar | Funciones especificas para este juego
-from Modulos.Functions.pygame.CF_functions import *
+from logic.pygame.CF_functions import *
 
 # Importar | Pygame y necesario
 import pygame
@@ -45,7 +45,7 @@ background_image = get_image(image='background')
 
 
 # Función, generar un mapa a partir de un archivo de texto
-class Map():
+class RenderMap():
     def __init__( self, x=None, y=None, path_main=None, map=None, grid_square=grid_square ):
         '''
         Esta función en base un archivo de texto, se posicionaran objetos en la pantalla.
@@ -67,90 +67,23 @@ class Map():
         '''
         super().__init__()
         
-        # Atributos necesarios
+        # Player y spawn
         self.player = None
         self.player_spawn_xy = None
-        self.path = None
-        self.next_level = None
-        self.climate = None
-        self.message_start = None
-        self.message_end = None
         
-        # Leer archivo de texto
-        prefix_map = 'cf_map'
-        if map.startswith(prefix_map):
-            if len(map)-3 >= 0:
-                list_map = map.split()
-                if (
-                    f'{list_map[len(map)-2]}{list_map[len(map)-1]}{list_map[len(map)]}' == 'txt'
-                ):
-                    pass
-        else:
-            map = f'{prefix_map}_{map}.txt'
-
-        if path_main == None:
-            file_text = Text_Read( os.path.join( dir_maps, map ), option='ModeText' )
-        else:
-            file_text = Text_Read( os.path.join( path_main, map), option='ModeText' )
+        # Obtener objeto mapa | Información necesaria del mapa
+        obj_map = Map()
+        read_map( obj_map, path_main=path_main, map=map)
         
-        # Ignorar comentarios y parametros tipo "$Parameter". 
-        file_text_ignore = Ignore_Comment( text=file_text, comment='#' )
-
-        # Agregar parametros en un diccionario.
-        parameters = {}
-        for line in file_text_ignore.split('\n'):
-            if line.startswith('$'):
-                with_value = False
-                for char in line:
-                    if char == '=':
-                        with_value = True
-
-                if with_value == True:
-                    param = line.split('=')
-                    
-                    split_char = None
-                    for char in param[1]:
-                        if char == ' ':
-                            pass
-                        else:
-                            if split_char == None:
-                                split_char = char
-                    param[1] = f'{split_char}{param[1].split(split_char)[1]}'
-                            
-                    parameters.update(
-                        {param[0].replace('$', '').replace(' ', '') : param[1]} 
-                    )
-        print(parameters)
-                    
-        # Ignorar comentarios y parametros tipo "$Parameter". 
-        file_text_ignore = Ignore_Comment( text=file_text_ignore, comment='$' )
-        file_text_ignore = file_text_ignore.split('\n')
-
-        # Solo aceptar caracteres relacionados con los objetos
-        '''
-        | = Limitación
-        . = Espacio
-        p = Player
-        f = Plataforma, Piso
-        b = Caja
-        [ = Escalara horizontal Izq
-        ] = Escalara horizontal Der
-        '''
-        prefix_obj = '|.pfb[]'
-        file_text_prefix = []
-        for line in file_text_ignore:
-            new_line = ''
-            for char in line:
-                for prefix_char in prefix_obj:
-                    if char == prefix_char:
-                        new_line += char
-            if not new_line == '':
-                file_text_prefix.append(new_line)
-        print(file_text_prefix)
+        self.path = obj_map.path
+        self.next_level = obj_map.next_level
+        self.climate = obj_map.climate
+        self.message_start = obj_map.message_start
+        self.message_end = obj_map.message_end
         
         # Agregar objetos dependiendo del caracter de texto
         y_multipler = 0
-        for line in file_text_prefix:
+        for line in obj_map.list_map:
             x_multipler = 0
             for char in line:            
                 # Agregar objeto
@@ -216,7 +149,7 @@ class Map():
             y_multipler += 1
             print(line)
         print(x_multipler, y_multipler)
-map_current = Map( map='level-1' )
+map_current = RenderMap( map='level-1' )
 player = map_current.player
 player_spawn_xy = map_current.player_spawn_xy
 
