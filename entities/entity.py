@@ -16,12 +16,17 @@ class CF():
         '''
         
         self.disp = [int, int]
+        self.grid_square = int
+
         self.volume = float
         self.fps = int
+
         self.music = bool
         self.climate_sound = bool
         self.show_clouds = bool
         self.show_collide = bool
+        self.show_sprite = bool
+
         self.current_level = str
 
 
