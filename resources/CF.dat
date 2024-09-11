@@ -1,11 +1,22 @@
-disp=1920x1080
-#1920x1080, 1440x810, 960x540, 480x270
+# Resoluciones compatibles (16:9):
+# 1920x1080 Funciona
+# 1024x576 Funciona
+# 960x540 Funciona
+# 512x288
+# 384x216
+# 256x144
+# 1440x810 (Bugeado, Salta como 1% mas alto el jugador)
+# 480x270 (Bugeado, Salta como 1% mas alto el jugador, camina a la izquierda mas rapido que a la derecha)
+# 128x72 (Bugeado, No camina a la derecha: x positivo)
+disp=1024x576
+
 volume=0.02
 fps=30
+
 music=False
 climate_sound=True
 show_clouds=True
 show_collide=False
-current_level=/home/jean_abraham/Proyectos/Programacion/VideoJuegos/pygame/Plataformero de prueba/data/maps/part2/cf_map_part2-level5.txt
-#/home/jean_abraham/Proyectos/Programacion/VideoJuegos/pygame/Plataformero de prueba/data/maps/cf_map_level-test.txt
-#/home/jean_abraham/Proyectos/Programacion/VideoJuegos/pygame/Plataformero de prueba/data/maps/part2/cf_map_part2-level5.txt
+show_sprite=True
+
+current_level=./resources/maps/cf_map.txt
