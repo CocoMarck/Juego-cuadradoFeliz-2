@@ -1,31 +1,34 @@
 Mi proyecto es un videojuego, y mi estructura es la siguiente:
-data/
-    Languages/
+resources/
+    languages/
         es.dat
         en.dat
         pt.dat
-    Functions/
-        CF_data.py
-        CF_info.py
-        Modulo_Language.py
     images/
     audio/
     CF.dat
+    
+entities/
+    entity.py
 
-Modulos/
-    Functions/
-        pygame/
-            CF_functions.py
-            CF_object.py
-            pygame_general_function.py
+data/
+    CF_data.py
+    CF_info.py
+    Modulo_Language.py
 
-        Modulo_Files.py
-        Modulo_System.py
-        Modulo_Text.py
+logic/
+    pygame/
+        CF_functions.py
+        CF_object.py
+        pygame_general_function.py
 
-    Interface/
-        Qt/
-        Gtk/
-        Modulo_ShowPrint.py
+    Modulo_Files.py
+    Modulo_System.py
+    Modulo_Text.py
+
+interface/
+    Qt/
+    Gtk/
+    Modulo_ShowPrint.py
 
 cuadradoFeliz-2.py
