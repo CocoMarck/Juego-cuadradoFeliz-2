@@ -1,4 +1,5 @@
 import os, pygame
+from entities.entity import *
 from data.CF_data import *
 
 pygame.init()
@@ -15,15 +16,7 @@ pygame.init()
 # 128x72 (Bugeado, No camina a la derecha: x positivo)
 # Información de juego
 title = 'Cuadrado Feliz 2'
+credits = 'CocoMarck'
 
-disp_width, disp_height = 1024,576
-DISPLAY_SIZE = (disp_width, disp_height)
-grid_square = disp_width/32
-
-fps = 30
-volume = 0.05
-
-
-# Para mostrar o no sprite
-show_collide = False
-show_sprite = True
+data_CF = CF()
+read_CF( data_CF )
