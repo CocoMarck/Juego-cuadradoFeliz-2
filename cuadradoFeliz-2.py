@@ -17,14 +17,14 @@ from pygame.locals import *
 
 # Establecer información del juego
 pygame.display.set_caption( title )
-display = pygame.display.set_mode( DISPLAY_SIZE )
+display = pygame.display.set_mode( data_CF.disp )
 clock = pygame.time.Clock()
 
 
 
 # Fuentes de texto
-size_font_normal = int(grid_square/2)
-size_font_big = int(grid_square*2)
+size_font_normal = int(data_CF.grid_square/2)
+size_font_big = int(data_CF.grid_square*2)
 font_str = 'monospace'
 font_normal = pygame.font.SysFont( font_str, size_font_normal )
 font_big = pygame.font.SysFont( font_str, size_font_big )
@@ -33,12 +33,12 @@ font_big = pygame.font.SysFont( font_str, size_font_big )
 
 
 # Para Escalar todo en pantalla
-display_scale = pygame.Surface( (disp_width*1, disp_height*1) )
+display_scale = pygame.Surface( (data_CF.disp[0]*1, data_CF.disp[1]*1) )
 
 
 
 # Función color de fondo
-background_color = pygame.Surface( (disp_width, disp_height), pygame.SRCALPHA )
+background_color = pygame.Surface( (data_CF.disp[0], data_CF.disp[1]), pygame.SRCALPHA )
 background_image = get_image(image='background')
 
 
@@ -46,7 +46,7 @@ background_image = get_image(image='background')
 
 # Función, generar un mapa a partir de un archivo de texto
 class RenderMap():
-    def __init__( self, x=None, y=None, path_main=None, map=None, grid_square=grid_square ):
+    def __init__( self, x=None, y=None, path_main=None, map=None, grid_square=data_CF.grid_square ):
         '''
         Esta función en base un archivo de texto, se posicionaran objetos en la pantalla.
 
@@ -158,7 +158,7 @@ player_spawn_xy = map_current.player_spawn_xy
 
 # Función tiempos de ejecución
 object_player_dead = None
-time_dead = fps*4
+time_dead = data_CF.fps*4
 time_count_dead = 0
 
 
@@ -166,9 +166,9 @@ time_count_dead = 0
 
 # Clima
 color_backgraund = GradiantColor( 
-    color=[155, 168, 187], divider=16, start_with_max_power=True, time=fps*120
+    color=[155, 168, 187], divider=16, start_with_max_power=True, time=data_CF.fps*120
 )
-if show_sprite == True:
+if data_CF.show_sprite == True:
     color_backgound_transparency = 127
 else:
     color_backgound_transparency = 255
@@ -183,8 +183,8 @@ scroll_float = [0,0]
 # Función Scroll/Camara | Posicionar camara en donde esta el jugador
 def start_camera(player):
     scroll_float = [0,0]
-    scroll_float[0] += (player.rect.x -scroll_float[0] -disp_width/2)
-    scroll_float[1] += (player.rect.y -scroll_float[1] -disp_height/2)
+    scroll_float[0] += (player.rect.x -scroll_float[0] -data_CF.disp[0]/2)
+    scroll_float[1] += (player.rect.y -scroll_float[1] -data_CF.disp[1]/2)
     
     return [int(scroll_float[0]), int(scroll_float[1])]
 
@@ -206,12 +206,12 @@ limit_xy = [ max(limit_xy[0]),  max(limit_xy[1]) ]
 '''
 Mejor, directamente cambiar la transparencia con un "set_alpha"
 '''
-if show_collide == True:
+if data_CF.show_collide == True:
     value_show_collide = 127
 else:
     value_show_collide = 0
 
-if show_sprite == True:
+if data_CF.show_sprite == True:
     value_show_sprite = 255
 else:
     value_show_sprite = 0
@@ -235,7 +235,7 @@ while loop_game:
     
     
     # Mostrar fondo
-    if show_sprite == True:
+    if data_CF.show_sprite == True:
         display_scale.blit( background_image, (0,0) )
 
     color = []
@@ -262,16 +262,16 @@ while loop_game:
         not_scroll_xy = detect_limit(
             obj=obj, player=player, player_spawn_xy=player_spawn_xy,
             scroll_float=scroll_float, not_scroll_xy=not_scroll_xy,
-            grid_square=grid_square, disp_width=disp_width, disp_height=disp_height
+            grid_square=data_CF.grid_square, disp_width=data_CF.disp[0], disp_height=data_CF.disp[1]
         )
                 
     
     # Función Scroll/Camara
     if not_scroll_xy[0] == False:
-        scroll_float[0] += (player.rect.x -scroll_float[0] -disp_width/2)/4
+        scroll_float[0] += (player.rect.x -scroll_float[0] -data_CF.disp[0]/2)/4
 
     if not_scroll_xy[1] == False:
-        scroll_float[1] += (player.rect.y -scroll_float[1] -disp_height/2)/4
+        scroll_float[1] += (player.rect.y -scroll_float[1] -data_CF.disp[1]/2)/4
 
     scroll_int = [int(scroll_float[0]), int(scroll_float[1])]
     
@@ -279,7 +279,7 @@ while loop_game:
     # Detectar el limite de la pantalla
     # Asi se haria
     #display_collision = obj_not_see(
-    #    disp_width+scroll_int[0], disp_height+scroll_int[1], obj=obj, difference=0, reduce_positive=False
+    #    data_CF.disp[0]+scroll_int[0], data_CF.disp[1]+scroll_int[1], obj=obj, difference=0, reduce_positive=False
     #)      
 
     # Detectar si un objeto colisiona con el limite del mapa/juego 
@@ -307,12 +307,12 @@ while loop_game:
             get_sound( 'dead' ).play()
             if object_player_dead == None:
                 #object_player_dead = Particle( 
-                #    size=grid_square, position=(player.rect.x -(player.rect.width*0.5), player.rect.y) 
+                #    size=data_CF.grid_square, position=(player.rect.x -(player.rect.width*0.5), player.rect.y) 
                 #)
                 #object_player_dead.transparency_collide = value_show_collide
                 #object_player_dead.transparency_sprite = value_show_sprite
                 #object_player_dead.update()
-                if show_sprite == False:
+                if data_CF.show_sprite == False:
                     object_player_dead = Player_dead(player=player, show_collide=True)
                 else:
                     object_player_dead = Player_dead(player=player, show_collide=False)
@@ -351,7 +351,7 @@ while loop_game:
     )
     display_scale.blit(
         text_hp, (
-            (disp_width)-(size_font_normal*3),
+            (data_CF.disp[0])-(size_font_normal*3),
             size_font_normal
         )
     )
@@ -361,7 +361,7 @@ while loop_game:
     )
     display_scale.blit(
         text_stamina, (
-            (disp_width)-(size_font_normal*3),
+            (data_CF.disp[0])-(size_font_normal*3),
             size_font_normal*2
         )
     )
@@ -371,7 +371,7 @@ while loop_game:
     )
     display_scale.blit(
         text_score, (
-            (disp_width)-(size_font_normal*3),
+            (data_CF.disp[0])-(size_font_normal*3),
             size_font_normal*3
         )
     )
@@ -380,11 +380,11 @@ while loop_game:
     
     
     # Mostrar todo en la pantalla escalada
-    surf = pygame.transform.scale(display_scale, DISPLAY_SIZE)
+    surf = pygame.transform.scale(display_scale, data_CF.disp)
     display.blit( surf, (0,0) )
 
-    # Fin | Mostrar todo y bloquear fps
+    # Fin | Mostrar todo y bloquear data_CF.fps
     pygame.display.update()
-    clock.tick(fps)
+    clock.tick(data_CF.fps)
 
 pygame.quit()
