@@ -6,7 +6,7 @@ import random
 
 
 # Contador jugador en el aire, basado en la resolucion de pantalla de juego.
-air_count_based_on_resolution = round(1920/disp_width)
+air_count_based_on_resolution = round(1920/data_CF.disp[0])
 if air_count_based_on_resolution < 0:
     air_count_based_on_resolution = 0
 elif air_count_based_on_resolution > 10:
@@ -351,10 +351,10 @@ class Player(pygame.sprite.Sprite):
 
         # Golpes | Tiempo hasta golpear
         '''
-        El tiempo hasta llegar al golpe esta basado en la multiplicación de los "fps" del juego por la variable "hit_framesMultipler".
-        fps = 30
+        El tiempo hasta llegar al golpe esta basado en la multiplicación de los "data_CF.fps" del juego por la variable "hit_framesMultipler".
+        data_CF.fps = 30
         hit_framesMultipler = 0.3
-        tiempo = fps*hit_framesMultipler = 9
+        tiempo = data_CF.fps*hit_framesMultipler = 9
         '''
         if self.hit_normal == True:
             self.__hit_framesCount += 1
@@ -376,7 +376,7 @@ class Player(pygame.sprite.Sprite):
                 self.__hit_framesCount += 1
                 self.hit_normal = False
 
-        if self.__hit_framesCount >= 30*hit_framesMultipler:#fps*hit_framesMultipler
+        if self.__hit_framesCount >= 30*hit_framesMultipler:#data_CF.fps*hit_framesMultipler
             self.__hit_framesCount = 0
             self.hit_normal = True
 
@@ -545,11 +545,11 @@ class Player(pygame.sprite.Sprite):
             
             
         # Colisión | Pantalla
-        display_collision = obj_not_see(disp_width, disp_height, obj=self, difference=0, reduce_positive=False)
+        display_collision = obj_not_see(data_CF.disp[0], data_CF.disp[1], obj=self, difference=0, reduce_positive=False)
         if not display_collision == None:
             pass#self.hp = 0
-            #self.rect.x = disp_width//2
-            #self.rect.y = disp_height//2
+            #self.rect.x = data_CF.disp[0]//2
+            #self.rect.y = data_CF.disp[1]//2
         
 
         # Sprite | Animar | Establecer sprite actual
@@ -785,7 +785,7 @@ class Player(pygame.sprite.Sprite):
 
 
 class Stone(pygame.sprite.Sprite):
-    def __init__(self, size=grid_square, position=(0,0)):
+    def __init__(self, size=data_CF.grid_square, position=(0,0)):
         super().__init__()
         
         # Transparencias
@@ -831,7 +831,7 @@ class Stone(pygame.sprite.Sprite):
 
 
 class hit_object(pygame.sprite.Sprite):
-    def __init__(self, size=grid_square, position=(0,0), damage=4, destroy_solids=False):
+    def __init__(self, size=data_CF.grid_square, position=(0,0), damage=4, destroy_solids=False):
         super().__init__()
         '''
         Collider que hace daño, sus parametros determinaran su daño y a que le hace daño.
@@ -854,7 +854,7 @@ class hit_object(pygame.sprite.Sprite):
             if self.rect.colliderect( solid.rect ):
                 Particle( 
                     size=self.rect.width, position=(self.rect.x, self.rect.y), color='grey',
-                    show_collide=True, time_kill=fps
+                    show_collide=True, time_kill=data_CF.fps
                 )
                 if self.destroy_solids == True:
                     #print(f'Quita -{self.damage}')
@@ -866,7 +866,7 @@ class hit_object(pygame.sprite.Sprite):
             if self.rect.colliderect( box.rect ):
                 Particle( 
                     size=self.rect.width, position=(self.rect.x, self.rect.y), color=[227,112,228],
-                    show_collide=True, time_kill=fps
+                    show_collide=True, time_kill=data_CF.fps
                 )
                 box.hp -= self.damage
                 box.damage_effect = True
@@ -881,7 +881,7 @@ class hit_object(pygame.sprite.Sprite):
 
 
 class Box(pygame.sprite.Sprite):
-    def __init__(self, size=[grid_square, grid_square], position=(0,0), spawning=False):
+    def __init__(self, size=[data_CF.grid_square, data_CF.grid_square], position=(0,0), spawning=False):
         super().__init__()
         '''
         Una caja que puede rotarse y ser destruida a trancazos.
@@ -1022,19 +1022,19 @@ class Box(pygame.sprite.Sprite):
                 split_image = [None, None, None, None]
             Particle(
                 size=self.rect.width/2, show_collide=False, color='green', image=split_image[0],
-                position = (self.rect.x, self.rect.y), time_kill=fps*4
+                position = (self.rect.x, self.rect.y), time_kill=data_CF.fps*4
             )
             Particle(
                 size=self.rect.width/2, show_collide=False, color='blue', image=split_image[1],
-                position = (self.rect.x+self.rect.width/2, self.rect.y), time_kill=fps*4
+                position = (self.rect.x+self.rect.width/2, self.rect.y), time_kill=data_CF.fps*4
             )
             Particle(
                 size=self.rect.width/2, show_collide=False, color='red', image=split_image[2],
-                position = (self.rect.x, self.rect.y+self.rect.width/2), time_kill=fps*4
+                position = (self.rect.x, self.rect.y+self.rect.width/2), time_kill=data_CF.fps*4
             )
             Particle(
                 size=self.rect.width/2, show_collide=False, color='yellow', image=split_image[3],
-                position = (self.rect.x+self.rect.width/2, self.rect.y+self.rect.width/2), time_kill=fps*4
+                position = (self.rect.x+self.rect.width/2, self.rect.y+self.rect.width/2), time_kill=data_CF.fps*4
             )
             
             if self.spawning == True:
@@ -1058,7 +1058,7 @@ class Box(pygame.sprite.Sprite):
 
 
 class Limit(pygame.sprite.Sprite):
-    def __init__(self, size=grid_square, position=(0,0) ):
+    def __init__(self, size=data_CF.grid_square, position=(0,0) ):
         super().__init__()
         '''
         Un objeto que permite establecer el limite de la camara.
@@ -1083,7 +1083,7 @@ class Limit(pygame.sprite.Sprite):
 
 class Particle(pygame.sprite.Sprite):
     def __init__(
-        self, size=grid_square/8, position=(0,0), color='green', image=None,
+        self, size=data_CF.grid_square/8, position=(0,0), color='green', image=None,
         show_collide=True, time_kill=0
     ):
         super().__init__()
@@ -1296,7 +1296,7 @@ class Player_dead():
 
 
 class Stair(pygame.sprite.Sprite):
-    def __init__(self, position=[0,0], size=grid_square, direction='left'):
+    def __init__(self, position=[0,0], size=data_CF.grid_square, direction='left'):
         super().__init__()
         '''
         Escaleras de tipo horizontal

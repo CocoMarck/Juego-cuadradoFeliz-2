@@ -44,9 +44,9 @@ for key in all_sounds.keys():
     sound_or_sounds = all_sounds[key]
     if type( sound_or_sounds ) == list:
         for sound in sound_or_sounds:
-            sound.set_volume( volume )
+            sound.set_volume( data_CF.volume )
     else:
-        sound_or_sounds.set_volume( volume )
+        sound_or_sounds.set_volume( data_CF.volume )
 
 
 # Sonido | Función para devolver un sonido
@@ -97,32 +97,32 @@ all_images.update( {
     'background':
     pygame.transform.scale(
         pygame.image.load( os.path.join(dir_sprites, 'background.png') ), 
-        (disp_width, disp_height)
+        (data_CF.disp[0], data_CF.disp[1])
     ),
 
     'stone':
     pygame.transform.scale(
         pygame.image.load( os.path.join(dir_sprites, 'floor/stone.png') ), 
-        (grid_square, grid_square)
+        (data_CF.grid_square, data_CF.grid_square)
     ),
     
     'elevator':
     pygame.transform.scale(
         pygame.image.load( os.path.join(dir_sprites, 'floor/elevator.png') ), 
-        (grid_square, grid_square)
+        (data_CF.grid_square, data_CF.grid_square)
     ),
     
     'box':
     pygame.transform.scale(
         pygame.image.load( os.path.join(dir_sprites, 'floor/box.png') ), 
-        (grid_square, grid_square)
+        (data_CF.grid_square, data_CF.grid_square)
     ),
     
     'player':
     Anim_sprite_set(
         sprite_sheet = pygame.transform.scale(
             pygame.image.load( os.path.join(dir_sprites, 'player/player.png') ),
-            (grid_square*4, grid_square)
+            (data_CF.grid_square*4, data_CF.grid_square)
         ),
         current_frame=None
     ),
@@ -131,7 +131,7 @@ all_images.update( {
     Anim_sprite_set(
         sprite_sheet = pygame.transform.scale(
             pygame.image.load( os.path.join(dir_sprites, 'player/player_hit-type.png') ),
-            (grid_square*8, grid_square*2)
+            (data_CF.grid_square*8, data_CF.grid_square*2)
         ),
         current_frame=None
     ),
@@ -139,7 +139,7 @@ all_images.update( {
     'item-coin':
     pygame.transform.scale(
         pygame.image.load( os.path.join(dir_sprites, 'items/coin.png') ),
-        (grid_square, grid_square)
+        (data_CF.grid_square, data_CF.grid_square)
     )
 
 } )
