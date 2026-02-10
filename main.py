@@ -1,11 +1,12 @@
 import pygame
 from entities.game_object import GameObject
+from core.pygame.graphics_utils import surface_with_background
 
 
 
 # Constantes
 GAME_TITLE = 'Cuadrado Feliz 2'
-FPS = 0
+FPS = 100
 
 WINDOW_SIZE = (960, 540)
 RENDER_RESOLUTION = (320, 180)
@@ -25,7 +26,7 @@ pygame.display.set_caption( GAME_TITLE )
 
 # Objetos
 example_object = GameObject(
-    surf = pygame.Surface( (GRID_SIZE, GRID_SIZE) )
+    surf=surface_with_background( (GRID_SIZE*0.5, GRID_SIZE), "purple" )
 )
 count = 0
 
@@ -50,9 +51,9 @@ while loop:
 
     ## Objetos
     count += dt
-    if count >= 0.2:
+    if count >= 0.01:
         count = 0
-        example_object.angle += 25
+        example_object.angle += 5
         example_object.rotate_surface()
     render_surface.blit( example_object.surf, example_object.rect )
 

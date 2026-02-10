@@ -38,12 +38,13 @@ class GameObject(pygame.sprite.Sprite):
         self.surf = surf.copy()
         self.rect = surf.get_rect( topleft=self._SPAWN_POSITION )
 
-    def flip_surface(self):
+    def build_surf(self):
         self.surf = pygame.transform.flip( self._SURF_BASE, self.flip_x, self.flip_y )
 
     def resize_rect(self):
         if self.surf.get_size() != self.rect.size:
-            self.surf = pygame.transform.scale(self._SURF_BASE, self.rect.size)
+            position = (self.rect.x, self.rect.y)
+            self.rect = self.surf.get_rect( topleft=position )
 
     def set_alpha(self, alpha: int ):
         self.surf.set_alpha( alpha )
@@ -57,8 +58,9 @@ class GameObject(pygame.sprite.Sprite):
         '''
         self.angle = normalize_angle( self.angle )
         if self.angle != 0:
-            self.flip_surface()
+            self.build_surf()
             self.surf = pygame.transform.rotate( self.surf, self.angle )
+            self.resize_rect()
 
     # Sonido
     def get_volume(self):
