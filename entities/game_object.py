@@ -53,6 +53,9 @@ class GameObject(pygame.sprite.Sprite):
             position = (self.rect.x, self.rect.y)
             self.rect = self.surf.get_rect( topleft=position )
 
+    def set_spawn_position(self):
+        self.rect.topleft = self._SPAWN_POSITION
+
     def set_spawn_alpha(self):
         self.surf.set_alpha( self._SPAWN_ALPHA )
 

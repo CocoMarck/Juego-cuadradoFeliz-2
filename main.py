@@ -34,7 +34,7 @@ count = 0
 
 basic_physics = ObjectWithPhysics(
     surf=surface_with_background( (GRID_SIZE, GRID_SIZE*0.5), "purple" ),
-    gravity_force=GRID_SIZE*10, limit_of_gravity_force=GRID_SIZE*30
+    vertical_force=GRID_SIZE*10, vertical_force_limit=GRID_SIZE*30
 )
 solid_objects = []
 
@@ -64,25 +64,36 @@ while loop:
     render_surface.fill( 'green' )
 
     ## Objetos
+    ### Contador
+    count += dt
+
     ### Eventos de objetos
     example_object.angle += 100 * dt # Cien grados cada segundo.
     example_object.rotate_surface()
 
     #basic_physics.moving_xy = [0,0]
     basic_physics.update( dt, solid_objects )
-    print(basic_physics.moving_xy )
+    print( basic_physics.moving_xy )
+    if round(count) == 5:
+        basic_physics.set_spawn_position()
+        solid.set_spawn_position()
+
+    if count > 2 and (not count >= 5):
+        solid.moving_xy[0] = GRID_SIZE*4
+    else:
+        solid.moving_xy[0] = 0
+    solid.update(dt)
 
     ### Objetos | Rederizado
     render_surface.blit( example_object.surf, example_object.rect )
     render_surface.blit( basic_physics.surf, basic_physics.rect )
     render_surface.blit( solid.surf, solid.rect )
 
-    #
-    count += dt
-    #if count >= 1.75:
-    #    loop = False
-    #    print(f'Segundos actuales: {count}')
-    #    input()
+    # Parar loop
+    if count >= 8:
+        loop = False
+        print(f'Segundos actuales: {count}')
+        input()
 
 
     ## Mostrar todo
