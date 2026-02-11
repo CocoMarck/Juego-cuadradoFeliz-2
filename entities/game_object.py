@@ -5,6 +5,13 @@ from core.pygame.angle_utils import normalize_angle
 class GameObject(pygame.sprite.Sprite):
     '''
     Objeto de juego con los atributos necesarios para eventos básicos del juego.
+    Evitar wrappers, para esto tendremos que tener claro que funciones tienen los objetos: `pygame.Surface` `pygame.Rect`.
+
+    `self.surf` tiene pa:
+        - `get_alpha()`, `set_alpha()`
+    `set_spawn_alpha()`
+
+    `get_volume`, `set_volume`, `set_spawn_volume`. Volumen de objeto.
     '''
     def __init__(
         self, name='object', group="generic", 
@@ -46,11 +53,8 @@ class GameObject(pygame.sprite.Sprite):
             position = (self.rect.x, self.rect.y)
             self.rect = self.surf.get_rect( topleft=position )
 
-    def set_alpha(self, alpha: int ):
-        self.surf.set_alpha( alpha )
-
     def set_spawn_alpha(self):
-        self.set_alpha( self._SPAWN_ALPHA )
+        self.surf.set_alpha( self._SPAWN_ALPHA )
 
     def rotate_surface(self):
         '''
@@ -66,7 +70,7 @@ class GameObject(pygame.sprite.Sprite):
     def get_volume(self):
         return self._volume
 
-    def update_volume(self, volume: float):
+    def set_volume(self, volume: float):
         if volume > 1:
             volume = float(1)
         elif volume < 0:
@@ -77,3 +81,10 @@ class GameObject(pygame.sprite.Sprite):
 
     def set_spawn_volume(self):
         self.update_volume( self._SPAWN_VOLUME )
+
+
+    def update(self, dt=1):
+        # Update por defecto.
+        self.rect.x += self.moving_xy[0]*dt
+        self.rect.y += self.moving_xy[1]*dt
+
