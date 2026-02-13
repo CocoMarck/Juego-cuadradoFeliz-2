@@ -1,6 +1,7 @@
 import pygame
 from entities.game_object import GameObject
 from entities.object_with_physics import ObjectWithPhysics
+from entities.player import Player
 from core.pygame.graphics_utils import surface_with_background
 
 
@@ -11,7 +12,7 @@ FPS = 100
 SECOND_TO_MILLISECONDS = 1000
 
 WINDOW_SIZE = (960, 540)
-RENDER_RESOLUTION = (1920, 1080)
+RENDER_RESOLUTION = (960, 540)
 GRID_SIZE = RENDER_RESOLUTION[0]//32
 
 # Rendrizado, y vistas jejej
@@ -26,23 +27,36 @@ pygame.display.set_caption( GAME_TITLE )
 
 
 
+# Renderizado de objetos
+layers_of_all_sprites = pygame.sprite.LayeredUpdates()
+solid_objects = pygame.sprite.Group()
+
+
 # Objetos
+count = 0
+
 example_object = GameObject(
     surf=surface_with_background( (GRID_SIZE*0.5, GRID_SIZE), "purple" )
 )
-count = 0
+layers_of_all_sprites.add( example_object, layer=0 )
 
 basic_physics = ObjectWithPhysics(
     surf=surface_with_background( (GRID_SIZE, GRID_SIZE*0.5), "purple" ),
-    vertical_force=GRID_SIZE*10, vertical_force_limit=GRID_SIZE*30
 )
-solid_objects = []
+layers_of_all_sprites.add( basic_physics, layer=0 )
 
-solid = GameObject(
-    surf=surface_with_background( (GRID_SIZE, GRID_SIZE), "grey" ),
-    position=( 0, RENDER_RESOLUTION[1]-GRID_SIZE )
+for x in range(0, 20):
+    solid = GameObject(
+        surf=surface_with_background( (GRID_SIZE, GRID_SIZE), "grey" ),
+        position=( GRID_SIZE*x, (RENDER_RESOLUTION[1]-GRID_SIZE) )
+    )
+    layers_of_all_sprites.add( solid, layer=0 )
+    solid_objects.add( solid )
+
+player = Player(
+    surf=surface_with_background( (GRID_SIZE, GRID_SIZE*0.5), "blue" ),
 )
-solid_objects.append(solid)
+layers_of_all_sprites.add( player, layer=0 )
 
 
 
@@ -73,27 +87,28 @@ while loop:
 
     #basic_physics.moving_xy = [0,0]
     basic_physics.update( dt, solid_objects )
-    print( basic_physics.moving_xy )
     if round(count) == 5:
         basic_physics.set_spawn_position()
         solid.set_spawn_position()
 
-    if count > 2 and (not count >= 5):
-        solid.moving_xy[0] = GRID_SIZE*4
-    else:
-        solid.moving_xy[0] = 0
+    #if count > 2 and (not count >= 5):
+    #    solid.moving_xy[0] = GRID_SIZE*4
+    #else:
+    #    solid.moving_xy[0] = 0
     solid.update(dt)
 
+    player.update(dt, solid_objects)
+    player.handle_input(dt, pygame.key.get_pressed() )
+
     ### Objetos | Rederizado
-    render_surface.blit( example_object.surf, example_object.rect )
-    render_surface.blit( basic_physics.surf, basic_physics.rect )
-    render_surface.blit( solid.surf, solid.rect )
+    for sprite in layers_of_all_sprites.sprites():
+        render_surface.blit( sprite.surf, sprite.rect )
 
     # Parar loop
-    if count >= 8:
-        loop = False
-        print(f'Segundos actuales: {count}')
-        input()
+    #if count >= 8:
+        #loop = False
+        #print(f'Segundos actuales: {count}')
+        #input()
 
 
     ## Mostrar todo

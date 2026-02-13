@@ -7,20 +7,21 @@ class ObjectWithPhysics(GameObject):
     La furza de gravedad, es por px's por segundo.
     Es decir, cada 1 segundos, el player se movera `x pixles`.
     '''
-    def __init__(self, *args, vertical_force=0.1, vertical_force_limit=None, **kwargs):
+    def __init__(self, *args, vertical_force: int=None, vertical_force_limit: int=None, **kwargs):
         super().__init__( *args, **kwargs )
 
         # Constantes
-        self._SPAWN_VERTICAL_FORCE = vertical_force
-        self._SPAWN_VERTICAL_FORCE_LIMIT = vertical_force_limit or max(self.rect.size)-1
+        self._SPAWN_VERTICAL_FORCE = vertical_force or max(self.rect.size)*30
+        self._SPAWN_VERTICAL_FORCE_LIMIT = vertical_force_limit or max(self.rect.size)*60
 
         # Gravedad
         self.current_vertical_force = 0
         self.vertical_force_limit = self._SPAWN_VERTICAL_FORCE_LIMIT
         self.vertical_force = self._SPAWN_VERTICAL_FORCE
 
-        # Para salto
+        # Detección de colision en el piso.
         self.air_dt_count = 1
+        self.collision_side = {}
 
 
     def apply_gravity(self, dt:float):
@@ -47,12 +48,7 @@ class ObjectWithPhysics(GameObject):
             self.rect, self.moving_xy, solid_objects
         )
 
-    def on_the_ground(self, dt=1, collision_side=None):
-        self.air_dt_count += dt
-
-        if collision_side['bottom']:
-            self.air_dt_count = 0
-
+    def on_the_ground(self):
         return (
             self.air_dt_count <= 0.1 and
             self.current_vertical_force >= 0
@@ -62,17 +58,13 @@ class ObjectWithPhysics(GameObject):
     def update(self, dt=1, solid_objects: pygame.sprite.Group=[] ):
         self.apply_gravity(dt)
 
-        collision_side = self.collide_and_move( solid_objects )
-        for x in collision_side.values():
-            if x == True:
-                self.current_vertical_force = 0
-                self.moving_xy[1] = 0
-                break
+        self.air_dt_count += dt
 
-        on_the_ground = self.on_the_ground(dt, collision_side)
-        print(on_the_ground)
-        if on_the_ground:
-            self.current_vertical_force -= 500
+        self.collision_side = self.collide_and_move( solid_objects )
+        if self.collision_side['bottom']:
+            self.current_vertical_force = 0
+            self.moving_xy[1] = 0
+            self.air_dt_count = 0
 
 
 
