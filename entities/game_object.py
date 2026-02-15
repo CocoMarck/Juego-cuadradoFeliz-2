@@ -16,7 +16,7 @@ class GameObject(pygame.sprite.Sprite):
     def __init__(
         self, name='object', group="generic", 
         surf: pygame.Surface = None, alpha=255, flip_x=False, flip_y=False, position=(0,0),
-        volume=float(1), angle=int(0)
+        volume=float(1), angle=int(0), state='idle'
     ):
         # Evitar hacer wrappers al surface o al rect, nada de eso.
         super().__init__()
@@ -41,8 +41,12 @@ class GameObject(pygame.sprite.Sprite):
         self.name = name
         self.group = group
 
+        # Estado
+        self.state = state
+
         # Superficie
         self.surf = surf.copy()
+        self.surf.set_alpha( alpha )
         self.rect = surf.get_rect( topleft=self._SPAWN_POSITION )
 
     def build_surf(self):

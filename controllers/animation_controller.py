@@ -13,7 +13,7 @@ class AnimationController:
         self.current_frame_index = 0
         self.time_accumulator = 0
 
-    def update(self, dt: float, state: str, frame_duration: int ):
+    def update(self, dt: float, state: str ):
         # Cambiar animación si el estado cambíio
         if state != self.current_state:
             self.current_state = state
@@ -26,6 +26,7 @@ class AnimationController:
             self.time_accumulator += dt
             if self.time_accumulator >= frame_duration:
                 self.current_frame_index = (self.current_frame_index + 1) % len(frames)
+                self.time_accumulator = 0
 
     def get_current_frame(self):
         # Obtener imagen actual.

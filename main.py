@@ -2,14 +2,17 @@ import pygame
 from entities.game_object import GameObject
 from entities.object_with_physics import ObjectWithPhysics
 from entities.sticky_sprite import StickySprite
+from entities.animated_sticky_sprite import AnimatedStickySprite
 from entities.player import Player
 from core.pygame.graphics_utils import surface_with_background
+from controllers.animation_controller import AnimationController
+
 
 
 
 # Constantes
 GAME_TITLE = 'Cuadrado Feliz 2'
-FPS = 60
+FPS = 100
 SECOND_TO_MILLISECONDS = 1000
 
 WINDOW_SIZE = (960, 540)
@@ -32,6 +35,7 @@ pygame.display.set_caption( GAME_TITLE )
 layers_of_all_sprites = pygame.sprite.LayeredUpdates()
 solid_objects = pygame.sprite.Group()
 sticky_sprites = pygame.sprite.Group()
+animated_sprites = pygame.sprite.Group()
 
 
 # Objetos
@@ -89,16 +93,27 @@ for x in range(0, 5):
 
 
 player = Player(
-    surf=pygame.Surface( (GRID_SIZE*0.5, GRID_SIZE) ),
+    surf=pygame.Surface( (GRID_SIZE*0.5, GRID_SIZE) ), alpha=0
 )
 layers_of_all_sprites.add( player, layer=0 )
 
-sticky_sprites.add(
-    StickySprite(
-        surf=surface_with_background( (GRID_SIZE*0.5, GRID_SIZE*0.5), "blue" ),
-        game_object=player, center=True
+
+player_animations = {
+    'idle': (
+        [
+            surface_with_background( (GRID_SIZE*0.5, GRID_SIZE*0.5), "blue" ),
+            surface_with_background( (GRID_SIZE*0.5, GRID_SIZE*0.5), "red" ),
+            surface_with_background( (GRID_SIZE*0.5, GRID_SIZE*0.5), "purple" )
+        ], 1
     )
+}
+animation = AnimatedStickySprite(
+    surf=player_animations['idle'][0][0],
+    game_object=player, center=True,
+    animation_controller=AnimationController( player_animations, state='idle' )
 )
+sticky_sprites.add( animation )
+animated_sprites.add( animation )
 
 for sprite in sticky_sprites:
     layers_of_all_sprites.add( sprite, layer=1 )
@@ -148,6 +163,9 @@ while loop:
 
     for sprite in sticky_sprites:
         sprite.stick()
+
+    for sprite in animated_sprites:
+        sprite.update(dt)
 
     ### Objetos | Rederizado
     for sprite in layers_of_all_sprites.sprites():
