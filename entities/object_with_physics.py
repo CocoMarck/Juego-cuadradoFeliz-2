@@ -11,8 +11,8 @@ class ObjectWithPhysics(GameObject):
         super().__init__( *args, **kwargs )
 
         # Constantes
-        self._SPAWN_VERTICAL_FORCE = vertical_force or max(self.rect.size)*30
-        self._SPAWN_VERTICAL_FORCE_LIMIT = vertical_force_limit or max(self.rect.size)*60
+        self._SPAWN_VERTICAL_FORCE = vertical_force or max(self.rect.size)*60
+        self._SPAWN_VERTICAL_FORCE_LIMIT = vertical_force_limit or max(self.rect.size)*120
 
         # Gravedad
         self.current_vertical_force = 0
@@ -54,7 +54,6 @@ class ObjectWithPhysics(GameObject):
             self.current_vertical_force >= 0
         )
 
-
     def update(self, dt=1, solid_objects: pygame.sprite.Group=[] ):
         self.apply_gravity(dt)
 
@@ -65,6 +64,8 @@ class ObjectWithPhysics(GameObject):
             self.current_vertical_force = 0
             self.moving_xy[1] = 0
             self.air_dt_count = 0
+        if self.collision_side['top']:
+            self.current_vertical_force = 0
 
 
 

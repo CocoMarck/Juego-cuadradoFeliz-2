@@ -1,6 +1,7 @@
 import pygame
 from entities.game_object import GameObject
 from entities.object_with_physics import ObjectWithPhysics
+from entities.sticky_sprite import StickySprite
 from entities.player import Player
 from core.pygame.graphics_utils import surface_with_background
 
@@ -8,7 +9,7 @@ from core.pygame.graphics_utils import surface_with_background
 
 # Constantes
 GAME_TITLE = 'Cuadrado Feliz 2'
-FPS = 100
+FPS = 60
 SECOND_TO_MILLISECONDS = 1000
 
 WINDOW_SIZE = (960, 540)
@@ -30,6 +31,7 @@ pygame.display.set_caption( GAME_TITLE )
 # Renderizado de objetos
 layers_of_all_sprites = pygame.sprite.LayeredUpdates()
 solid_objects = pygame.sprite.Group()
+sticky_sprites = pygame.sprite.Group()
 
 
 # Objetos
@@ -53,10 +55,53 @@ for x in range(0, 20):
     layers_of_all_sprites.add( solid, layer=0 )
     solid_objects.add( solid )
 
+for x in range(0, 5):
+    solid = GameObject(
+        surf=surface_with_background( (GRID_SIZE, GRID_SIZE), "grey" ),
+        position=( (RENDER_RESOLUTION[0]-GRID_SIZE)-GRID_SIZE*x, (RENDER_RESOLUTION[1]-GRID_SIZE*5) )
+    )
+    layers_of_all_sprites.add( solid, layer=0 )
+    solid_objects.add( solid )
+
+for x in range(0, 5):
+    solid = GameObject(
+        surf=surface_with_background( (GRID_SIZE, GRID_SIZE), "grey" ),
+        position=( (GRID_SIZE*10) + GRID_SIZE*x, (RENDER_RESOLUTION[1]-GRID_SIZE*7) )
+    )
+    layers_of_all_sprites.add( solid, layer=0 )
+    solid_objects.add( solid )
+
+for x in range(0, 5):
+    solid = GameObject(
+        surf=surface_with_background( (GRID_SIZE, GRID_SIZE), "grey" ),
+        position=( (RENDER_RESOLUTION[0]-GRID_SIZE*2)-GRID_SIZE*x, (RENDER_RESOLUTION[1]-GRID_SIZE*10) )
+    )
+    layers_of_all_sprites.add( solid, layer=0 )
+    solid_objects.add( solid )
+
+for x in range(0, 5):
+    solid = GameObject(
+        surf=surface_with_background( (GRID_SIZE, GRID_SIZE), "grey" ),
+        position=( (GRID_SIZE*12) + GRID_SIZE*x, (RENDER_RESOLUTION[1]-GRID_SIZE*14) )
+    )
+    layers_of_all_sprites.add( solid, layer=0 )
+    solid_objects.add( solid )
+
+
 player = Player(
-    surf=surface_with_background( (GRID_SIZE, GRID_SIZE*0.5), "blue" ),
+    surf=pygame.Surface( (GRID_SIZE*0.5, GRID_SIZE) ),
 )
 layers_of_all_sprites.add( player, layer=0 )
+
+sticky_sprites.add(
+    StickySprite(
+        surf=surface_with_background( (GRID_SIZE*0.5, GRID_SIZE*0.5), "blue" ),
+        game_object=player, center=True
+    )
+)
+
+for sprite in sticky_sprites:
+    layers_of_all_sprites.add( sprite, layer=1 )
 
 
 
@@ -83,11 +128,12 @@ while loop:
 
     ### Eventos de objetos
     example_object.angle += 100 * dt # Cien grados cada segundo.
-    example_object.rotate_surface()
+    example_object.rotate_surf()
 
     #basic_physics.moving_xy = [0,0]
+    #print(basic_physics.moving_xy[1])
     basic_physics.update( dt, solid_objects )
-    if round(count) == 5:
+    if int(count) == 5:
         basic_physics.set_spawn_position()
         solid.set_spawn_position()
 
@@ -99,6 +145,9 @@ while loop:
 
     player.update(dt, solid_objects)
     player.handle_input(dt, pygame.key.get_pressed() )
+
+    for sprite in sticky_sprites:
+        sprite.stick()
 
     ### Objetos | Rederizado
     for sprite in layers_of_all_sprites.sprites():

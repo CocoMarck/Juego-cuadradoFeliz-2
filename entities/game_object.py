@@ -59,7 +59,7 @@ class GameObject(pygame.sprite.Sprite):
     def set_spawn_alpha(self):
         self.surf.set_alpha( self._SPAWN_ALPHA )
 
-    def rotate_surface(self):
+    def rotate_surf(self):
         '''
         Rotar superficie
         '''

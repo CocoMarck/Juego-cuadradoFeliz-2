@@ -5,9 +5,19 @@ class Character(ObjectWithPhysics):
         super().__init__( *args, **kwargs )
 
         self._SPANW_HP = hp
-        self._SPAWN_JUMP_FORCE = jump_force or max(self.rect.size)*15
+        self._SPAWN_JUMP_FORCE = jump_force or max(self.rect.size)*23
         self._SPAWN_SPEED = speed or max(self.rect.size)*16
 
         self.hp = self._SPANW_HP
         self.jump_force = self._SPAWN_JUMP_FORCE
         self.speed = self._SPAWN_SPEED
+        self._WALKING_SPEED_MULTIPLIER = 0.5
+
+    def get_speed(self, dt:float, multiplier:float ):
+        return self.speed * multiplier * dt
+
+    def get_running_speed(self, dt=1 ):
+        return self.get_speed(dt, 1)
+
+    def get_walking_speed(self, dt=1 ):
+        return self.get_speed(dt, self._WALKING_SPEED_MULTIPLIER)

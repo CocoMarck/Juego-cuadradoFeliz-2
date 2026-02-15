@@ -7,10 +7,15 @@ class Player(Character):
         super().__init__(args, **kwargs)
 
     def handle_input(self, dt=1, keys=None):
+        if keys[pygame.K_LSHIFT]:
+            speed = self.get_walking_speed(dt)
+        else:
+            speed = self.get_running_speed(dt)
+
         if keys[pygame.K_LEFT]:
-            self.moving_xy[0] = -(self.speed) * dt
+            self.moving_xy[0] = -speed
         elif keys[pygame.K_RIGHT]:
-            self.moving_xy[0] = self.speed * dt
+            self.moving_xy[0] = speed
         else:
             self.moving_xy[0] = 0
 
