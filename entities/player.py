@@ -13,8 +13,10 @@ class Player(Character):
             speed = self.get_running_speed(dt)
 
         if keys[pygame.K_LEFT]:
+            self.flip_x = True
             self.moving_xy[0] = -speed
         elif keys[pygame.K_RIGHT]:
+            self.flip_x = False
             self.moving_xy[0] = speed
         else:
             self.moving_xy[0] = 0

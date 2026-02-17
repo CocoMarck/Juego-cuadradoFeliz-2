@@ -98,12 +98,49 @@ player = Player(
 layers_of_all_sprites.add( player, layer=0 )
 
 
+player_surf = pygame.Surface( (GRID_SIZE*0.8, GRID_SIZE*0.5), pygame.SRCALPHA )
+player_surf.blit(
+    surface_with_background( (GRID_SIZE*0.5, GRID_SIZE*0.5), "white"),
+    (0,0)
+)
+player_surf.blit(
+    surface_with_background( (GRID_SIZE*0.3, GRID_SIZE*0.1), "white"),
+    (GRID_SIZE*0.5,0)
+)
+
+def get_surf( color ):
+    surf = player_surf.copy()
+
+    mask = pygame.Surface( surf.get_size() ).convert_alpha()
+    mask.fill(color)
+
+    surf.blit( mask, (0,0), special_flags=pygame.BLEND_RGBA_MULT )
+
+    return surf
+
 player_animations = {
     'idle': (
         [
-            surface_with_background( (GRID_SIZE*0.5, GRID_SIZE*0.5), "blue" ),
-            surface_with_background( (GRID_SIZE*0.5, GRID_SIZE*0.5), "red" ),
-            surface_with_background( (GRID_SIZE*0.5, GRID_SIZE*0.5), "purple" )
+            get_surf("blue"),
+            get_surf("red"),
+            get_surf("purple"),
+        ], 1
+    ),
+    'move': (
+        [
+            get_surf("white"),
+            get_surf("grey"),
+            get_surf("black"),
+        ], 0.1
+    ),
+    'jumping': (
+        [
+            get_surf("skyblue"),
+        ], 1
+    ),
+    'falling': (
+        [
+            get_surf("pink"),
         ], 1
     )
 }

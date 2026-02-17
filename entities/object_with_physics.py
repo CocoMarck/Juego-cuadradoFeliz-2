@@ -54,6 +54,17 @@ class ObjectWithPhysics(GameObject):
             self.current_vertical_force >= 0
         )
 
+    def update_state(self):
+        if self.moving_xy[0] != 0:
+            self.state = 'move'
+        else:
+            self.state = 'idle'
+
+        if self.moving_xy[1] < 0:
+            self.state = 'jumping'
+        elif not self.on_the_ground():
+            self.state = 'falling'
+
     def update(self, dt=1, solid_objects: pygame.sprite.Group=[] ):
         self.apply_gravity(dt)
 
@@ -66,6 +77,8 @@ class ObjectWithPhysics(GameObject):
             self.air_dt_count = 0
         if self.collision_side['top']:
             self.current_vertical_force = 0
+
+        self.update_state()
 
 
 
