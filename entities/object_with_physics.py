@@ -55,15 +55,16 @@ class ObjectWithPhysics(GameObject):
         )
 
     def update_state(self):
-        if self.moving_xy[0] != 0:
-            self.state = 'move'
-        else:
-            self.state = 'idle'
+        move = self.moving_xy[0] != 0
+        prefix = "idle"
+        if move:
+            prefix = 'move'
+        self.state = prefix
 
         if self.moving_xy[1] < 0:
-            self.state = 'jumping'
+            self.state = f'jumping-{prefix}'
         elif not self.on_the_ground():
-            self.state = 'falling'
+            self.state = f'falling-{prefix}'
 
     def update(self, dt=1, solid_objects: pygame.sprite.Group=[] ):
         self.apply_gravity(dt)

@@ -21,3 +21,10 @@ class Character(ObjectWithPhysics):
 
     def get_walking_speed(self, dt=1 ):
         return self.get_speed(dt, self._WALKING_SPEED_MULTIPLIER)
+
+    def jump(self, dt=1, multiplier=1 ):
+        self.current_vertical_force = -( self.jump_force*multiplier )
+
+    def jump_on_the_ground(self, dt=1, multiplier=1):
+        if self.on_the_ground():
+            self.jump( dt=dt, multiplier=multiplier )

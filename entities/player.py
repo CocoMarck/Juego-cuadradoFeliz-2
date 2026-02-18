@@ -21,5 +21,5 @@ class Player(Character):
         else:
             self.moving_xy[0] = 0
 
-        if keys[pygame.K_SPACE] and self.on_the_ground():
-            self.current_vertical_force = -(self.jump_force)
+        if keys[pygame.K_SPACE]:
+            self.jump_on_the_ground( dt )

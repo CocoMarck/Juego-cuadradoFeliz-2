@@ -70,7 +70,7 @@ for x in range(0, 5):
 for x in range(0, 5):
     solid = GameObject(
         surf=surface_with_background( (GRID_SIZE, GRID_SIZE), "grey" ),
-        position=( (GRID_SIZE*10) + GRID_SIZE*x, (RENDER_RESOLUTION[1]-GRID_SIZE*7) )
+        position=( (GRID_SIZE*12) + GRID_SIZE*x, (RENDER_RESOLUTION[1]-GRID_SIZE*7) )
     )
     layers_of_all_sprites.add( solid, layer=0 )
     solid_objects.add( solid )
@@ -86,7 +86,7 @@ for x in range(0, 5):
 for x in range(0, 5):
     solid = GameObject(
         surf=surface_with_background( (GRID_SIZE, GRID_SIZE), "grey" ),
-        position=( (GRID_SIZE*12) + GRID_SIZE*x, (RENDER_RESOLUTION[1]-GRID_SIZE*14) )
+        position=( (GRID_SIZE*13) + GRID_SIZE*x, (RENDER_RESOLUTION[1]-GRID_SIZE*14) )
     )
     layers_of_all_sprites.add( solid, layer=0 )
     solid_objects.add( solid )
@@ -133,14 +133,24 @@ player_animations = {
             get_surf("black"),
         ], 0.1
     ),
-    'jumping': (
+    'jumping-idle': (
         [
             get_surf("skyblue"),
         ], 1
     ),
-    'falling': (
+    'falling-idle': (
         [
             get_surf("pink"),
+        ], 1
+    ),
+    'jumping-move': (
+        [
+            get_surf("red"),
+        ], 1
+    ),
+    'falling-move': (
+        [
+            get_surf("yellow"),
         ], 1
     )
 }
