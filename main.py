@@ -16,7 +16,7 @@ FPS = 100
 SECOND_TO_MILLISECONDS = 1000
 
 WINDOW_SIZE = (960, 540)
-RENDER_RESOLUTION = (960, 540)
+RENDER_RESOLUTION = (512, 288)
 GRID_SIZE = RENDER_RESOLUTION[0]//32
 
 # Rendrizado, y vistas jejej
@@ -36,6 +36,7 @@ layers_of_all_sprites = pygame.sprite.LayeredUpdates()
 solid_objects = pygame.sprite.Group()
 sticky_sprites = pygame.sprite.Group()
 animated_sprites = pygame.sprite.Group()
+character_sprites = pygame.sprite.Group()
 
 
 # Objetos
@@ -205,8 +206,9 @@ while loop:
     #    solid.moving_xy[0] = 0
     solid.update(dt)
 
+    player.handle_input( pygame.key.get_pressed() )
+    player.move(dt)
     player.update(dt, solid_objects)
-    player.handle_input(dt, pygame.key.get_pressed() )
 
     for sprite in sticky_sprites:
         sprite.stick()
