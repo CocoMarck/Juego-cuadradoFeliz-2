@@ -19,27 +19,27 @@ class Character(ObjectWithPhysics):
         self.move_right = False
         self.move_jump = False
 
-    def get_speed(self, dt:float, multiplier:float ):
-        return self.speed * multiplier * dt
+    def get_speed(self, multiplier:float ):
+        return self.speed * multiplier
 
-    def get_running_speed(self, dt=1 ):
-        return self.get_speed(dt, 1)
+    def get_running_speed(self):
+        return self.get_speed(1)
 
-    def get_walking_speed(self, dt=1 ):
-        return self.get_speed(dt, self._WALKING_SPEED_MULTIPLIER)
+    def get_walking_speed(self):
+        return self.get_speed(self._WALKING_SPEED_MULTIPLIER)
 
-    def jump(self, dt=1, multiplier=1 ):
-        self.current_vertical_force = -( self.jump_force*multiplier )
+    def jump_multiplier(self, multiplier=1 ):
+        self.jump( self.jump_force*multiplier )
 
-    def jump_on_the_ground(self, dt=1, multiplier=1):
+    def jump_on_the_ground(self, multiplier=1):
         if self.on_the_ground():
-            self.jump( dt=dt, multiplier=multiplier )
+            self.jump_multiplier( multiplier=multiplier )
 
-    def move(self, dt=1):
+    def move(self):
         if self.move_walk:
-            speed = self.get_walking_speed(dt)
+            speed = self.get_walking_speed()
         else:
-            speed = self.get_running_speed(dt)
+            speed = self.get_running_speed()
 
         if self.move_left:
             self.flip_x = True
@@ -51,4 +51,4 @@ class Character(ObjectWithPhysics):
             self.moving_xy[0] = 0
 
         if self.move_jump:
-            self.jump_on_the_ground( dt )
+            self.jump_on_the_ground()

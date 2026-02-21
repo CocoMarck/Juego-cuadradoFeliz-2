@@ -207,7 +207,7 @@ while loop:
     solid.update(dt)
 
     player.handle_input( pygame.key.get_pressed() )
-    player.move(dt)
+    player.move()
     player.update(dt, solid_objects)
 
     for sprite in sticky_sprites:

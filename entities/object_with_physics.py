@@ -15,7 +15,6 @@ class ObjectWithPhysics(GameObject):
         self._SPAWN_VERTICAL_FORCE_LIMIT = vertical_force_limit or max(self.rect.size)*120
 
         # Gravedad
-        self.current_vertical_force = 0
         self.vertical_force_limit = self._SPAWN_VERTICAL_FORCE_LIMIT
         self.vertical_force = self._SPAWN_VERTICAL_FORCE
 
@@ -33,26 +32,29 @@ class ObjectWithPhysics(GameObject):
         # Recomendación.
         Cada 1 segundo se mueva: 10 rect max(size). Y como maximo 30 max(size)
         '''
-        self.current_vertical_force += self.vertical_force*dt
-        if self.current_vertical_force > self.vertical_force_limit:
-            self.current_vertical_force = self.vertical_force_limit
-
-        self.moving_xy[1] = self.current_vertical_force*dt
+        self.moving_xy[1] += self.vertical_force*dt
+        if self.moving_xy[1] > self.vertical_force_limit:
+            self.moving_xy[1] = self.vertical_force_limit
 
 
-    def collide_and_move(self, solid_objects: list):
+    def collide_and_move(self, dt: float, solid_objects: list):
         '''
         Colisionar con objeto solido y moverse.
         '''
+        move_x = round(self.moving_xy[0] * dt)
+        move_y = round(self.moving_xy[1] * dt)
         return collide_and_move(
-            self.rect, self.moving_xy, solid_objects
+            self.rect, (move_x, move_y), solid_objects
         )
 
     def on_the_ground(self):
         return (
             self.air_dt_count <= 0.1 and
-            self.current_vertical_force >= 0
+            self.moving_xy[1] >= 0
         )
+
+    def jump(self, force):
+        self.moving_xy[1] = -force
 
     def update_state(self):
         move = self.moving_xy[0] != 0
@@ -71,13 +73,12 @@ class ObjectWithPhysics(GameObject):
 
         self.air_dt_count += dt
 
-        self.collision_side = self.collide_and_move( solid_objects )
+        self.collision_side = self.collide_and_move( dt=dt, solid_objects=solid_objects )
         if self.collision_side['bottom']:
-            self.current_vertical_force = 0
             self.moving_xy[1] = 0
             self.air_dt_count = 0
         if self.collision_side['top']:
-            self.current_vertical_force = 0
+            self.moving_xy[1] = 0
 
         self.update_state()
 
