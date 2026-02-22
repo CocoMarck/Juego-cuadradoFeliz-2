@@ -57,6 +57,9 @@ class ObjectWithPhysics(GameObject):
         self.moving_xy[1] = -force
 
     def update_state(self):
+        '''
+        Defaults states.
+        '''
         move = self.moving_xy[0] != 0
         prefix = "idle"
         if move:

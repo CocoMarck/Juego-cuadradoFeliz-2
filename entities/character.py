@@ -52,3 +52,20 @@ class Character(ObjectWithPhysics):
 
         if self.move_jump:
             self.jump_on_the_ground()
+
+    def update_state(self):
+        '''
+        Character move states
+        '''
+        move = self.moving_xy[0] != 0
+        prefix = "idle"
+        if move:
+            prefix = 'move'
+        self.state = prefix
+        if move and self.move_walk:
+            self.state += '-walk'
+
+        if self.moving_xy[1] < 0:
+            self.state = f'jumping-{prefix}'
+        elif not self.on_the_ground():
+            self.state = f'falling-{prefix}'

@@ -109,13 +109,15 @@ player_surf.blit(
     (GRID_SIZE*0.5,0)
 )
 
-def get_surf( color ):
+def get_surf( color, angle=0 ):
     surf = player_surf.copy()
 
     mask = pygame.Surface( surf.get_size() ).convert_alpha()
     mask.fill(color)
 
     surf.blit( mask, (0,0), special_flags=pygame.BLEND_RGBA_MULT )
+    if angle != 0:
+        return pygame.transform.rotate( surf, angle )
 
     return surf
 
@@ -130,28 +132,35 @@ player_animations = {
     'move': (
         [
             get_surf("white"),
-            get_surf("grey"),
-            get_surf("black"),
+            get_surf("grey", 10),
+            get_surf("black", -10),
         ], 0.1
+    ),
+    'move-walk': (
+        [
+            get_surf("white"),
+            get_surf("grey", 5),
+            get_surf("black", -5),
+        ], 0.2
     ),
     'jumping-idle': (
         [
-            get_surf("skyblue"),
+            get_surf("skyblue", 10),
         ], 1
     ),
     'falling-idle': (
         [
-            get_surf("pink"),
+            get_surf("pink", -10),
         ], 1
     ),
     'jumping-move': (
         [
-            get_surf("red"),
+            get_surf("red", 20),
         ], 1
     ),
     'falling-move': (
         [
-            get_surf("yellow"),
+            get_surf("yellow", -20),
         ], 1
     )
 }
