@@ -5,10 +5,9 @@ class Scene():
     La escena de juego. Todo se guardara en el `RenderSurface`.
     '''
     def __init__(
-        self, render_resolution:list, grid_size: int, groups:dict, name:str,
+        self, render_resolution:list, groups:dict, name:str,
     ):
         self.render_resolution = render_resolution
-        self.grid_size = grid_size
         self.render_surface = pygame.Surface( self.render_resolution )
         self.name = name
 
