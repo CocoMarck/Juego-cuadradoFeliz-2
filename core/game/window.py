@@ -15,9 +15,6 @@ class Window:
         self.window = None
         self.clock = None
 
-        # Inicializar objetos
-        self.init_pygame()
-
     def init_pygame(self):
         pygame.init()
         pygame.display.set_caption( self.title )
@@ -26,13 +23,13 @@ class Window:
         self.clock = pygame.time.Clock()
 
     def run(self):
-        while self.scene.signals['loop']:
+        while self.scene.loop:
             dt = self.clock.tick(self.fps) / SECOND_TO_MILLISECONDS
             fps = self.clock.get_fps()
 
             self.scene.handle_events(pygame.event.get())
 
-            self.scene.update(dt)
+            self.scene.update(dt, pygame.key.get_pressed())
 
             self.scene.render()
 

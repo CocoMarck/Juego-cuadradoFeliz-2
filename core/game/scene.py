@@ -16,9 +16,8 @@ class Scene():
         self.layers = pygame.sprite.LayeredUpdates()
 
         # Señales de juego.
-        self.signals = {
-            "loop": True
-        }
+        self.loop = True
+        self.key_get_pressed = None
 
     def init_objects(self):
         '''
@@ -32,14 +31,14 @@ class Scene():
         '''
         for event in events:
             if event.type == pygame.QUIT:
-                self.signals["loop"] = False
+                self.loop = False
 
-    def update(self, dt):
+    def update(self, dt=1, key_get_pressed=None):
         '''
         Actualizar eventos, normalmente solo usando groups.
         Normalmente es, los `"update"`, reciben `sprite.update()`.
         '''
-        print( self.groups.keys() )
+        pass#print( self.groups.keys() )
 
     def render(self):
         '''
