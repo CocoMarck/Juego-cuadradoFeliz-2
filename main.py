@@ -92,6 +92,14 @@ for x in range(0, 5):
     layers_of_all_sprites.add( solid, layer=0 )
     solid_objects.add( solid )
 
+for x in range(0, 5):
+    solid = GameObject(
+        surf=surface_with_background( (GRID_SIZE, GRID_SIZE), "grey" ),
+        position=( RENDER_RESOLUTION[0]-GRID_SIZE, GRID_SIZE*x )
+    )
+    layers_of_all_sprites.add( solid, layer=0 )
+    solid_objects.add( solid )
+
 
 player = Player(
     surf=pygame.Surface( (GRID_SIZE*0.5, GRID_SIZE) ), alpha=0
